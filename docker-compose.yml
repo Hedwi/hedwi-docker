@@ -1,0 +1,126 @@
+version: '3'
+
+services:
+  db:
+    image: mysql:5.7
+    restart: always
+    command: --init-file /data/www/init.sql
+    volumes:
+      - ./init.sql:/data/www/init.sql
+      - dbdata:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=hedwi_selfhost
+    ports:
+      - 43306:3306
+    networks:
+      - hedwi
+
+
+  minio:
+    image: minio/minio:latest
+    restart: always
+    container_name: minio
+    command: server /data/www/minio --address :9000 --console-address :9001
+    ports:
+      - 49000:9000
+      - 49001:9001
+    networks:
+      - hedwi
+    network_mode: bridge
+    environment:
+      MINIO_ACCESS_KEY: "username"
+      MINIO_SECRET_KEY: "password"
+    logging:
+      options:
+        max-size: "10M"
+        max-file: "10"
+      driver: json-file
+    volumes:
+      - ./minio/data:/data/www/minio
+      - ./minio/config:/root/.minio
+
+  consul:
+    container_name: consul
+    image: consul:latest
+    ports:
+      - 48500:8500
+    networks:
+      - hedwi
+    command: ["consul","agent","-server","-bootstrap","-data-dir","/consul","-ui","-bind","127.0.0.1","-client","0.0.0.0"]
+
+  hedis:
+    image: hedwi/hedis:latest
+    restart: always
+    tty: true
+    ports:
+      - 6381:6381
+    networks:
+      - hedwi
+
+  web:
+    image: hedwi/hedwi:latest
+    restart: always
+    tty: true
+    ports:
+      - 40008:40008
+    networks:
+      - hedwi
+    environment:
+      MINIO_ROOT_USER: "username"
+      MINIO_ROOT_PASSWORD: "password"
+      HEDWI_LICENSE: "8e6f6f92214dbf921ff19c2950c8814599aeadf4fedbc984723674f78f37c54d904c8259680dc47ec9b72aee92cdf550431d924198e169c4021f818a9ad246936f7cbcd78fa8516ac855c7fd1fddf7857005ceef70b0aae784c33450439a8fb9b00d130c15bd609cc44e9cacf63d55d0d5534b989cf9889a4235300347c035d98d8486d0bdb0c24dc22305b006"
+      HEDWI_CERT_DIR: "/data/www/hedwi-certs"
+      HEDWI_FROMUSER: ""
+      HEDWI_IMAP_ADDR: "0.0.0.0:42994"
+      HEDWI_IMAP_TLS_ADDR: "0.0.0.0:42993"
+      HEDWI_HUB_RPC_ADDR: "0.0.0.0:41002"
+      HEDWI_SEARCH_RPC_ADDR: "0.0.0.0:41701"
+      HEDWI_FILTER_RPC_ADDR: "0.0.0.0:41003"
+      HEDWI_NATS_URL: "nats://127.0.0.1:42422"
+      HEDWI_NATS_CLUSTER_ID: "hedwi"
+      HEDWI_NATS_TASK_CLIENT_ID: "hedwi-service-a"
+      HEDWI_NATS_TASK_MAIL_SEND_SUBJECT: "hedwi-send"
+      HEDWI_NATS_TASK_MAIL_SAVE_SUBJECT: "hedwi-save"
+      HEDWI_CONSUL: "consul:8500"
+      HEDWI_SQLDB: "mysql://root:password@tcp(db:3306)/hedwi_selfhost?charset=utf8&parseTime=true"
+      HEDWI_HTTP_ADDR: "0.0.0.0:40008"
+      HEDWI_ALLOW_ORIGIN: "http://127.0.0.1:4200"
+      HEDWI_OSS_ADDR: "minio:9000"
+      HEDWI_OSS_ACCESS_KEY: "username"
+      HEDWI_OSS_ACCESS_SECRET: "password"
+      HEDWI_OSS_USE_SSL: "false"
+      HEDWI_OSS_MAIL_BUCKET_NAME: "hedwimail"
+      HEDWI_SESSION_HEDIS_HOST: "hedis:6381"
+      HEDWI_SESSION_HEDIS_PASSWORD: ""
+      HEDWI_SESSION_HEDIS_DB: "1"
+      HEDWI_SESSION_HEDIS_POOLSIZE: "10"
+      HEDWI_CACHE_HEDIS_HOST: "hedis:6381"
+      HEDWI_CACHE_HEDIS_PASSWORD: ""
+      HEDWI_CACHE_HEDIS_DB: "0"
+      HEDWI_CACHE_HEDIS_POOLSIZE: "20"
+      HEDWI_SMTP_KEY: "hedwi-smtp-bucket"
+      HEDWI_SMTP_HOSTNAME: ""
+      HEDWI_SMTP_MAX_DATASIZE: "50"
+      HEDWI_SMTP_DATA_DIR: "/data/www/hedwi-smtp/data"
+      HEDWI_SMTP_ADDRESSES: "0.0.0.0:42025"
+      HEDWI_SMTP_SUBMISSION_ADDRESSES: "systemd"
+      HEDWI_SMTP_SUBMISSION_TLS_ADDRESSES: "0.0.0.0:42465"
+      HEDWI_SMTP_MONITOR_ADDRESSES: ""
+      HEDWI_DRIVE_OSS_PUBLIC_ADDR: "minio:9000"
+      HEDWI_DRIVE_OSS_ADDR: "minio:9000"
+      HEDWI_DRIVE_OSS_ACCESS_KEY: "username"
+      HEDWI_DRIVE_OSS_ACCESS_SECRET: "password"
+      HEDWI_DRIVE_OSS_USE_SSL: false
+      HEDWI_DRIVE_OSS_BUCKET_NAME: "drive"
+    depends_on:
+       - db
+       - minio
+       - consul
+
+volumes:
+    dbdata:
+
+networks:
+  hedwi:
+
