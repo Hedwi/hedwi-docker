@@ -1,2 +1,5 @@
 redis/data/dump.rdb
 minio/data/.minio.sys/
+mydb/data/
+crdb/data/
+
