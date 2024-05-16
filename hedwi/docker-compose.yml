@@ -86,6 +86,22 @@ services:
     networks:
       - hedwi
 
+  meetserver:
+    image: hedwi/hedwi-meetserver:latest
+    restart: always
+    volumes:
+      - ./meetserver/config.yaml:/data/www/hedwi-meetserver/config.yaml
+    working_dir: /data/www/hedwi-meetserver
+    command: ["/data/www/hedwi-meetserver/hedwi-meetserver"]
+    ports:
+      - "48888:8888"
+      - "7881:7881"
+      - "7882:7882/udp"
+    depends_on:
+      - redis
+    networks:
+      - hedwi
+
   web:
     image: hedwi/hedwi-inbox:latest
     command: ["/data/www/hedwi-inbox/hedwi-inbox"]
@@ -155,6 +171,7 @@ services:
        - redis
        - minio
        - consul
+       - meetserver
 
   nginx:   #jenkins服务/其他服务（web服务/nginx服务等）
     image: nginx:1.22  #nginx镜像，如果镜像容器没有会去自动拉取
@@ -175,6 +192,7 @@ volumes:
     redis:
     conf:
     minio:
+    meetserver:
 
 networks:
   hedwi:

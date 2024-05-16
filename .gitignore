@@ -1,5 +1,5 @@
-redis/data/dump.rdb
-minio/data/.minio.sys/
-mydb/data/
-crdb/data/
+hedwi/redis/data/dump.rdb
+hedwi/minio/data/.minio.sys/
+hedwi/mydb/data/
+hedwi/crdb/data/
 
