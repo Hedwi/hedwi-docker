@@ -42,7 +42,7 @@ services:
   minio:
     image: minio/minio:latest
     restart: always
-    container_name: minio
+    container_name: hedwi_minio
     command: server /data/www/minio --address :9000 --console-address :9001
     ports:
       - 49000:9000
@@ -63,7 +63,7 @@ services:
       - ./minio/config:/root/.minio
 
   consul:
-    container_name: hashicorp
+    container_name: hedwi_consul
     image: hashicorp/consul:latest
     ports:
       - 48500:8500
@@ -74,7 +74,7 @@ services:
   redis:
     image: 'redis:6.0'
     restart: always
-    container_name: docker_redis
+    container_name: hedwi_redis
     volumes:
       - ./redis/data:/data/
       - ./redis/logs/redis.log:/var/log/redis.log
@@ -118,8 +118,8 @@ services:
     environment:
       HEDWI_OFFICE_API_ADDR: "0.0.0.0:42201"
       HEDWI_SQLDB: "postgresql://root@crdb:26257/hedwi_selfhost"
-      HEDWI_DRIVE_OSS_PUBLIC_ADDR: "minio:9000"
-      HEDWI_DRIVE_OSS_ADDR: "minio:9000"
+      HEDWI_DRIVE_OSS_PUBLIC_ADDR: "hedwi_minio:9000"
+      HEDWI_DRIVE_OSS_ADDR: "hedwi_minio:9000"
       HEDWI_DRIVE_OSS_ACCESS_KEY: "username"
       HEDWI_DRIVE_OSS_ACCESS_SECRET: "password"
       HEDWI_DRIVE_OSS_USE_SSL: false
@@ -167,12 +167,12 @@ services:
       HEDWI_NATS_TASK_CLIENT_ID: "hedwi-service-a"
       HEDWI_NATS_TASK_MAIL_SEND_SUBJECT: "hedwi-send"
       HEDWI_NATS_TASK_MAIL_SAVE_SUBJECT: "hedwi-save"
-      HEDWI_CONSUL: "consul:8500"
+      HEDWI_CONSUL: "hedwi_consul:8500"
         #HEDWI_SQLDB: "mysql://root:password@tcp(db:3306)/hedwi_selfhost?charset=utf8&parseTime=true"
       HEDWI_SQLDB: "postgresql://root@crdb:26257/hedwi_selfhost"
       HEDWI_HTTP_ADDR: "0.0.0.0:40008"
       HEDWI_ALLOW_ORIGIN: "http://127.0.0.1:4200"
-      HEDWI_OSS_ADDR: "minio:9000"
+      HEDWI_OSS_ADDR: "hedwi_minio:9000"
       HEDWI_OSS_ACCESS_KEY: "username"
       HEDWI_OSS_ACCESS_SECRET: "password"
       HEDWI_OSS_USE_SSL: "false"
@@ -193,7 +193,7 @@ services:
       HEDWI_SMTP_SUBMISSION_ADDRESSES: "systemd"
       HEDWI_SMTP_SUBMISSION_TLS_ADDRESSES: "0.0.0.0:42465"
       HEDWI_SMTP_MONITOR_ADDRESSES: ""
-      HEDWI_DRIVE_OSS_PUBLIC_ADDR: "minio:9000"
+      HEDWI_DRIVE_OSS_PUBLIC_ADDR: "hedwi_minio:9000"
       HEDWI_DRIVE_OSS_ADDR: "minio:9000"
       HEDWI_DRIVE_OSS_ACCESS_KEY: "username"
       HEDWI_DRIVE_OSS_ACCESS_SECRET: "password"
@@ -211,7 +211,7 @@ services:
 
   nginx:   #jenkins服务/其他服务（web服务/nginx服务等）
     image: nginx:1.22  #nginx镜像，如果镜像容器没有会去自动拉取
-    container_name: nginx       #容器的名称
+    container_name: hedwi_nginx       #容器的名称
     restart: always             #跟随docker的启动而启动
     volumes:                    #挂载卷命令
       - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf
