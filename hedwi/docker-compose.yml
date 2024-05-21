@@ -76,11 +76,11 @@ services:
     restart: always
     container_name: hedwi_redis
     volumes:
-      - ./redis/data:/data/
-      - ./redis/logs/redis.log:/var/log/redis.log
-      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./redis/data:/data/redis
+      - ./redis/logs/redis.log:/data/logs/redis.log
+      - ./redis/redis.conf:/etc/redis/redis.conf
     command:
-      redis-server /usr/local/etc/redis/redis.conf
+      redis-server /etc/redis/redis.conf
     ports:
       - 46379:6379
     networks:
