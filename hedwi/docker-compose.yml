@@ -1,32 +1,12 @@
 version: '3'
 
 services:
-  #
-  #mydb:
-  #  image: mysql:5.7
-  #  restart: always
-  #  command: --init-file /data/www/init.sql
-  #  volumes:
-  #    - ./mydb/init.sql:/data/www/init.sql
-  #    - ./mydb/data:/var/lib/mysql
-  #  environment:
-  #    - MYSQL_ROOT_PASSWORD=password
-  #    - MYSQL_DATABASE=hedwi_selfhost
-  #  ports:
-  #    - 43306:3306
-  #  networks:
-  #    - hedwi
-
   crdb:
     image: cockroachdb/cockroach:v23.2.5
-    ports:
-      - "26257:26257"
-      - "8080:8080"
-    command: start-single-node --insecure
+    command: start-single-node --insecure --listen-addr=${CRDB_ADDR} --http-addr=${CRDB_WEB_ADDR}
     volumes:
      - ./crdb/data:/cockroach/cockroach-data
-    networks:
-      - hedwi
+    network_mode: "host"
 
   crdb-init:
     image: cockroachdb/cockroach:v23.2.5
@@ -34,8 +14,7 @@ services:
       - ./crdb/setup_db.sh:/setup_db.sh
     entrypoint: "/bin/bash"
     command: /setup_db.sh
-    networks:
-     - hedwi
+    network_mode: "host"
     depends_on:
      - crdb
 
@@ -43,16 +22,14 @@ services:
     image: minio/minio:latest
     restart: always
     container_name: hedwi_minio
-    command: server /data/www/minio --address :9000 --console-address :9001
+    command: server /data/www/minio --address ${MINIO_ADDR} --console-address ${MINIO_WEB_ADDR}
     ports:
       - 49000:9000
       - 49001:9001
-    networks:
-      - hedwi
-        #network_mode: bridge
+    network_mode: "host"
     environment:
-      MINIO_ACCESS_KEY: "username"
-      MINIO_SECRET_KEY: "password"
+      MINIO_ACCESS_KEY: "${MINIO_USER}"
+      MINIO_SECRET_KEY: "${MINIO_PASSWORD}"
     logging:
       options:
         max-size: "10M"
@@ -63,13 +40,13 @@ services:
       - ./minio/config:/root/.minio
 
   consul:
-    container_name: hedwi_consul
     image: hashicorp/consul:latest
+    container_name: hedwi_consul
+    restart: always
+    command: ["consul","agent","-server","-bootstrap","-data-dir","/consul","-ui","-bind","${BINDIP}","-client","0.0.0.0"]
     ports:
       - 48500:8500
-    networks:
-      - hedwi
-    command: ["consul","agent","-server","-bootstrap","-data-dir","/consul","-ui","-bind","127.0.0.1","-client","0.0.0.0"]
+    network_mode: "host"
 
   redis:
     image: 'redis:6.0'
@@ -83,25 +60,25 @@ services:
       redis-server /etc/redis/redis.conf
     ports:
       - 46379:6379
-    networks:
-      - hedwi
+    network_mode: "host"
 
   
-  meetserver:
+  meet-server:
     image: hedwi/hedwi-meetserver:latest
     restart: always
     volumes:
       - ./meetserver/config.yaml:/data/www/hedwi-meetserver/config.yaml
     working_dir: /data/www/hedwi-meetserver
     command: ["/data/www/hedwi-meetserver/hedwi-meetserver"]
-    ports:
-      - "48888:8888"
-      - "7881:7881"
-      - "7882:7882/udp"
+    network_mode: "host"
+    environment:
+      REDIS_ADDR: "${REDIS_ADDR}"
+      REDIS_USER: "${REDIS_USER}"
+      REDIS_PASSWORD: "${REDIS_PASSWORD}"
+      MEET_KEY: "${MEET_KEY}"
+      MEET_SECRET: "${MEET_SECRET}"
     depends_on:
       - redis
-    networks:
-      - hedwi
 
 
   office-api:
@@ -112,17 +89,14 @@ services:
     tty: true
     volumes:
       - ./office-api/logs:/data/www/hedwi-office-api/logs
-    ports:
-      - 42201:42201
-    networks:
-      - hedwi
+    network_mode: "host"
     environment:
-      HEDWI_OFFICE_API_ADDR: "0.0.0.0:42201"
-      HEDWI_SQLDB: "postgresql://root@crdb:26257/hedwi_selfhost"
-      HEDWI_DRIVE_OSS_PUBLIC_ADDR: "hedwi_minio:9000"
-      HEDWI_DRIVE_OSS_ADDR: "hedwi_minio:9000"
-      HEDWI_DRIVE_OSS_ACCESS_KEY: "username"
-      HEDWI_DRIVE_OSS_ACCESS_SECRET: "password"
+      HEDWI_OFFICE_API_ADDR: "${OFFICE_API_ADDR}"
+      HEDWI_SQLDB: "postgresql://root@$CRDB_ADDR/${DB_NAME}"
+      HEDWI_DRIVE_OSS_PUBLIC_ADDR: "${MINIO_PUBLIC_URL}"
+      HEDWI_DRIVE_OSS_ADDR: "${MINIO_ADDR}"
+      HEDWI_DRIVE_OSS_ACCESS_KEY: "${MINIO_USER}"
+      HEDWI_DRIVE_OSS_ACCESS_SECRET: "${MINIO_PASSWORD}"
       HEDWI_DRIVE_OSS_USE_SSL: false
       HEDWI_DRIVE_OSS_BUCKET_NAME: "drive"
     depends_on:
@@ -142,47 +116,46 @@ services:
     volumes:
       - ./inbox/logs:/data/www/hedwi-inbox/logs
       - ./inbox/certs:/tmp/hedwi-certs
+      - /etc/ssl/certs/ca-bundle.crt:/etc/ssl/certs/ca-bundle.crt
+      - /etc/ssl/certs/ca-bundle.trust.crt:/etc/ssl/certs/ca-bundle.trust.crt
     ports:
-      - 40008:40008
-    networks:
-      - hedwi
-    logging:
-      options:
-        max-size: "10M"
-        max-file: "10"
-      driver: json-file
+      - "40008:40008"
+    network_mode: "host"
     environment:
-      MINIO_ROOT_USER: "username"
-      MINIO_ROOT_PASSWORD: "password"
-      HEDWI_LICENSE: "a80bac5ba4aeef649322bc3ec0946e671f81b6f9cb333e754f48fbbcb1960f91d20037a574bf6b92a4cf689e9cac614f4accb3c470c7bd3a384c2681e4dbe8414453dcea053d5bdb77b8256a084b8be13fb831a638179fc8a31c8e1f3bc0af43425f065f0ec6cae0daf901c28eec90bde634df2744ef740ea65cc386e7559a70cf225651e3a09c444e1aa03a0b"
-      HEDWI_OFFICE_SERVER: "http://hedwi_office_api:42201"
+      MINIO_ROOT_USER: "${MINIO_USER}"
+      MINIO_ROOT_PASSWORD: "${MINIO_PASSWORD}"
+      HEDWI_LICENSE: "${HEDWI_LICENSE}"
+      HEDWI_OFFICE_SERVER: "http://${OFFICE_API_ADDR}"
+      HEDWI_MEET_SERVER: "/"
+      HEDWI_MEET_KEY: "${MEET_KEY}"
+      HEDWI_MEET_SECRET: "${MEET_SECRET}"
       HEDWI_CERT_DIR: "/tmp/hedwi-certs"
       HEDWI_FROMUSER: ""
-      HEDWI_IMAP_ADDR: "0.0.0.0:42994"
-      HEDWI_IMAP_TLS_ADDR: "0.0.0.0:42993"
-      HEDWI_HUB_RPC_ADDR: "0.0.0.0:41002"
-      HEDWI_SEARCH_RPC_ADDR: "0.0.0.0:41701"
-      HEDWI_FILTER_RPC_ADDR: "0.0.0.0:41003"
-      HEDWI_NATS_URL: "nats://127.0.0.1:42422"
+      HEDWI_IMAP_ADDR: "${IMAP_ADDR}"
+      HEDWI_IMAP_TLS_ADDR: "${IMAP_TLS_ADDR}"
+      HEDWI_HUB_RPC_ADDR: "${HUB_ADDR}"
+      HEDWI_SEARCH_RPC_ADDR: "${SEARCH_ADDR}"
+      HEDWI_FILTER_RPC_ADDR: "${BINDIP}:41003"
+      HEDWI_NATS_URL: "nats://${BINDIP}:42422"
       HEDWI_NATS_CLUSTER_ID: "hedwi"
       HEDWI_NATS_TASK_CLIENT_ID: "hedwi-service-a"
       HEDWI_NATS_TASK_MAIL_SEND_SUBJECT: "hedwi-send"
       HEDWI_NATS_TASK_MAIL_SAVE_SUBJECT: "hedwi-save"
-      HEDWI_CONSUL: "hedwi_consul:8500"
-        #HEDWI_SQLDB: "mysql://root:password@tcp(db:3306)/hedwi_selfhost?charset=utf8&parseTime=true"
-      HEDWI_SQLDB: "postgresql://root@crdb:26257/hedwi_selfhost"
-      HEDWI_HTTP_ADDR: "0.0.0.0:40008"
-      HEDWI_ALLOW_ORIGIN: "http://127.0.0.1:4200"
-      HEDWI_OSS_ADDR: "hedwi_minio:9000"
-      HEDWI_OSS_ACCESS_KEY: "username"
-      HEDWI_OSS_ACCESS_SECRET: "password"
+      #HEDWI_CONSUL: "hedwi_consul:8500"
+      HEDWI_CONSUL: ""
+      HEDWI_SQLDB: "postgresql://root@$CRDB_ADDR/${DB_NAME}"
+      HEDWI_HTTP_ADDR: "${BINDIP}:40008"
+      HEDWI_ALLOW_ORIGIN: "http://${BINDIP}:4200"
+      HEDWI_OSS_ADDR: "${MINIO_ADDR}"
+      HEDWI_OSS_ACCESS_KEY: "${MINIO_USER}"
+      HEDWI_OSS_ACCESS_SECRET: "${MINIO_PASSWORD}"
       HEDWI_OSS_USE_SSL: "false"
       HEDWI_OSS_MAIL_BUCKET_NAME: "hedwimail"
-      HEDWI_SESSION_HEDIS_HOST: "hedwi_redis:6379"
+      HEDWI_SESSION_HEDIS_HOST: "${REDIS_ADDR}"
       HEDWI_SESSION_HEDIS_PASSWORD: ""
       HEDWI_SESSION_HEDIS_DB: "1"
       HEDWI_SESSION_HEDIS_POOLSIZE: "10"
-      HEDWI_CACHE_HEDIS_HOST: "hedwi_redis:6379"
+      HEDWI_CACHE_HEDIS_HOST: "${REDIS_ADDR}"
       HEDWI_CACHE_HEDIS_PASSWORD: ""
       HEDWI_CACHE_HEDIS_DB: "0"
       HEDWI_CACHE_HEDIS_POOLSIZE: "20"
@@ -194,10 +167,10 @@ services:
       HEDWI_SMTP_SUBMISSION_ADDRESSES: "systemd"
       HEDWI_SMTP_SUBMISSION_TLS_ADDRESSES: "0.0.0.0:42465"
       HEDWI_SMTP_MONITOR_ADDRESSES: ""
-      HEDWI_DRIVE_OSS_PUBLIC_ADDR: "hedwi_minio:9000"
-      HEDWI_DRIVE_OSS_ADDR: "hedwi_minio:9000"
-      HEDWI_DRIVE_OSS_ACCESS_KEY: "username"
-      HEDWI_DRIVE_OSS_ACCESS_SECRET: "password"
+      HEDWI_DRIVE_OSS_PUBLIC_ADDR: "${MINIO_PUBLIC_URL}"
+      HEDWI_DRIVE_OSS_ADDR: "${MINIO_ADDR}"
+      HEDWI_DRIVE_OSS_ACCESS_KEY: "${MINIO_USER}"
+      HEDWI_DRIVE_OSS_ACCESS_SECRET: "${MINIO_PASSWORD}"
       HEDWI_DRIVE_OSS_USE_SSL: false
       HEDWI_DRIVE_OSS_BUCKET_NAME: "drive"
     depends_on:
@@ -208,7 +181,7 @@ services:
        - minio
        - consul
        - office-api
-       - meetserver
+       - meet-server
 
   nginx:   #jenkins服务/其他服务（web服务/nginx服务等）
     image: nginx:1.22  #nginx镜像，如果镜像容器没有会去自动拉取
@@ -222,25 +195,19 @@ services:
       #- ./nginx/logs/access.log:/var/log/nginx/access.log
       #- ./nginx/logs/error.log:/var/log/nginx/error.log
       - ./nginx/conf.d/inbox.conf:/etc/nginx/conf.d/default.conf #映射配置文件
+      - ./nginx/conf.d/meet.conf:/etc/nginx/conf.d/meet.conf #映射配置文件
       - ./nginx/certs:/etc/nginx/certs #映射配置文件
-    ports:
-      - 80:80    #宿主主机端口80 映射到 容器端口80
-      - 443:443    #宿主主机端口80 映射到 容器端口80
+      - ./nginx/certs/*:/etc/ssl/certs #映射配置文件
     depends_on:
       - web
-    networks:
-      - hedwi
+    network_mode: "host"
 
 volumes:
-  #mydb:
     crdb:
     redis:
     conf:
     nginx:
     minio:
     office-api:
-    meetserver:
-
-networks:
-  hedwi:
+    meet-server:
 
