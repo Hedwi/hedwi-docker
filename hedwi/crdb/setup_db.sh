@@ -1,8 +1,12 @@
 #!/bin/bash
 echo Wait for servers to be up
-sleep 10
+sleep 1
 
-HOSTPARAMS="--host crdb --insecure"
-SQL="/cockroach/cockroach.sh sql $HOSTPARAMS"
+CRDB_ADDR='127.0.0.1:26257';
+DB_NAME='hedwi_selfhost';
+HOSTPARAMS="--host ${CRDB_ADDR} --insecure";
+SQL="/cockroach/cockroach.sh sql $HOSTPARAMS";
 
-$SQL -e "CREATE DATABASE hedwi_selfhost;"
+CREATEDB="CREATE DATABASE $DB_NAME;"
+
+$SQL -e "$CREATEDB";
