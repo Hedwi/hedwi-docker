@@ -129,7 +129,6 @@ services:
       HEDWI_MEET_SERVER: "/"
       HEDWI_MEET_KEY: "${MEET_KEY}"
       HEDWI_MEET_SECRET: "${MEET_SECRET}"
-      HEDWI_CERT_DIR: "/tmp/hedwi-certs"
       HEDWI_FROMUSER: ""
       HEDWI_IMAP_ADDR: "${IMAP_ADDR}"
       HEDWI_IMAP_TLS_ADDR: "${IMAP_TLS_ADDR}"
