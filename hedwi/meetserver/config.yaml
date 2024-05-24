@@ -1,4 +1,4 @@
-web_port: 8888
+web_addr: $MEET_ADDR
 port: 7880
 log_level: info
 rtc:
@@ -25,4 +25,4 @@ turn:
   # domain must match tls certificate
   domain: $DOMAIN
   # defaults to 3478. If not using a load balancer, must be set to 443.
-  tls_port: 443
+  tls_port: 3478

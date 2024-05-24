@@ -23,9 +23,6 @@ services:
     restart: always
     container_name: hedwi_minio
     command: server /data/www/minio --address ${MINIO_ADDR} --console-address ${MINIO_WEB_ADDR}
-    ports:
-      - 49000:9000
-      - 49001:9001
     network_mode: "host"
     environment:
       MINIO_ACCESS_KEY: "${MINIO_USER}"
@@ -44,8 +41,6 @@ services:
     container_name: hedwi_consul
     restart: always
     command: ["consul","agent","-server","-bootstrap","-data-dir","/consul","-ui","-bind","${BINDIP}","-client","0.0.0.0"]
-    ports:
-      - 48500:8500
     network_mode: "host"
 
   redis:
@@ -58,8 +53,6 @@ services:
       - ./redis/redis.conf:/etc/redis/redis.conf
     command:
       redis-server /etc/redis/redis.conf
-    ports:
-      - 46379:6379
     network_mode: "host"
 
   
@@ -72,13 +65,16 @@ services:
     command: ["/data/www/hedwi-meetserver/hedwi-meetserver"]
     network_mode: "host"
     environment:
+      DOMAIN: "${DOMAIN}"
+      MEET_ADDR: "${HEDWI_MEET_ADDR}"
       REDIS_ADDR: "${REDIS_ADDR}"
       REDIS_USER: "${REDIS_USER}"
       REDIS_PASSWORD: "${REDIS_PASSWORD}"
-      MEET_KEY: "${MEET_KEY}"
-      MEET_SECRET: "${MEET_SECRET}"
+      HEDWI_MEET_KEY: "${HEDWI_MEET_KEY}"
+      HEDWI_MEET_SECRET: "${HEDWI_MEET_SECRET}"
     depends_on:
       - redis
+
 
 
   office-api:
@@ -118,33 +114,28 @@ services:
       - ./inbox/certs:/tmp/hedwi-certs
       - /etc/ssl/certs/ca-bundle.crt:/etc/ssl/certs/ca-bundle.crt
       - /etc/ssl/certs/ca-bundle.trust.crt:/etc/ssl/certs/ca-bundle.trust.crt
-    ports:
-      - "40008:40008"
     network_mode: "host"
     environment:
-      MINIO_ROOT_USER: "${MINIO_USER}"
-      MINIO_ROOT_PASSWORD: "${MINIO_PASSWORD}"
       HEDWI_LICENSE: "${HEDWI_LICENSE}"
       HEDWI_OFFICE_SERVER: "http://${OFFICE_API_ADDR}"
-      HEDWI_MEET_SERVER: "/"
-      HEDWI_MEET_KEY: "${MEET_KEY}"
-      HEDWI_MEET_SECRET: "${MEET_SECRET}"
+      HEDWI_MEET_SERVER: "${HEDWI_MEET_SERVER}"
+      HEDWI_MEET_KEY: "${HEDWI_MEET_KEY}"
+      HEDWI_MEET_SECRET: "${HEDWI_MEET_SECRET}"
       HEDWI_FROMUSER: ""
       HEDWI_IMAP_ADDR: "${IMAP_ADDR}"
       HEDWI_IMAP_TLS_ADDR: "${IMAP_TLS_ADDR}"
       HEDWI_HUB_RPC_ADDR: "${HUB_ADDR}"
       HEDWI_SEARCH_RPC_ADDR: "${SEARCH_ADDR}"
-      HEDWI_FILTER_RPC_ADDR: "${BINDIP}:41003"
-      HEDWI_NATS_URL: "nats://${BINDIP}:42422"
+      HEDWI_FILTER_RPC_ADDR: "${FILTER_ADDR}"
+      HEDWI_NATS_URL: "${NATS_URL}"
       HEDWI_NATS_CLUSTER_ID: "hedwi"
       HEDWI_NATS_TASK_CLIENT_ID: "hedwi-service-a"
       HEDWI_NATS_TASK_MAIL_SEND_SUBJECT: "hedwi-send"
       HEDWI_NATS_TASK_MAIL_SAVE_SUBJECT: "hedwi-save"
-      #HEDWI_CONSUL: "hedwi_consul:8500"
-      HEDWI_CONSUL: ""
+      HEDWI_CONSUL: "${CONSUL_ADDR}"
       HEDWI_SQLDB: "postgresql://root@$CRDB_ADDR/${DB_NAME}"
       HEDWI_HTTP_ADDR: "${BINDIP}:40008"
-      HEDWI_ALLOW_ORIGIN: "http://${BINDIP}:4200"
+      HEDWI_ALLOW_ORIGIN: "${ALLOW_ORIGIN}"
       HEDWI_OSS_ADDR: "${MINIO_ADDR}"
       HEDWI_OSS_ACCESS_KEY: "${MINIO_USER}"
       HEDWI_OSS_ACCESS_SECRET: "${MINIO_PASSWORD}"
@@ -162,9 +153,9 @@ services:
       HEDWI_SMTP_HOSTNAME: ""
       HEDWI_SMTP_MAX_DATASIZE: "50"
       HEDWI_SMTP_DATA_DIR: "/data/www/hedwi-smtp/data"
-      HEDWI_SMTP_ADDRESSES: "0.0.0.0:42025"
+      HEDWI_SMTP_ADDRESSES: "${SMTP_ADDR}"
       HEDWI_SMTP_SUBMISSION_ADDRESSES: "systemd"
-      HEDWI_SMTP_SUBMISSION_TLS_ADDRESSES: "0.0.0.0:42465"
+      HEDWI_SMTP_SUBMISSION_TLS_ADDRESSES: "${SMTP_TLS_ADDR}"
       HEDWI_SMTP_MONITOR_ADDRESSES: ""
       HEDWI_DRIVE_OSS_PUBLIC_ADDR: "${MINIO_PUBLIC_URL}"
       HEDWI_DRIVE_OSS_ADDR: "${MINIO_ADDR}"
@@ -194,9 +185,9 @@ services:
       #- ./nginx/logs/access.log:/var/log/nginx/access.log
       #- ./nginx/logs/error.log:/var/log/nginx/error.log
       - ./nginx/conf.d/inbox.conf:/etc/nginx/conf.d/default.conf #映射配置文件
-      - ./nginx/conf.d/meet.conf:/etc/nginx/conf.d/meet.conf #映射配置文件
       - ./nginx/certs:/etc/nginx/certs #映射配置文件
       - ./nginx/certs/*:/etc/ssl/certs #映射配置文件
+      - ./inbox/certs/*:/etc/nginx/certs # 当生成证书之后替换掉默认证书
     depends_on:
       - web
     network_mode: "host"
