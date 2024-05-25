@@ -89,17 +89,32 @@ services:
     environment:
       HEDWI_OFFICE_API_ADDR: "${OFFICE_API_ADDR}"
       HEDWI_SQLDB: "postgresql://root@$CRDB_ADDR/${DB_NAME}"
-      HEDWI_DRIVE_OSS_PUBLIC_ADDR: "${MINIO_PUBLIC_URL}"
+      HEDWI_DRIVE_OSS_PUBLIC_ADDR: "https://${DOMAIN}/oss/"
       HEDWI_DRIVE_OSS_ADDR: "${MINIO_ADDR}"
       HEDWI_DRIVE_OSS_ACCESS_KEY: "${MINIO_USER}"
       HEDWI_DRIVE_OSS_ACCESS_SECRET: "${MINIO_PASSWORD}"
-      HEDWI_DRIVE_OSS_USE_SSL: false
+      HEDWI_DRIVE_OSS_USE_SSL: ${MINIO_USESSL}
       HEDWI_DRIVE_OSS_BUCKET_NAME: "drive"
     depends_on:
        - crdb
        - crdb-init
        - minio
 
+  search:
+    image: hedwi/hedwi-search:latest
+    container_name: hedwi_search       #容器的名称
+    command: ["/data/www/hedwi-search/hedwi-search"]
+    restart: always
+    tty: true
+    volumes:
+      - ./search/logs:/data/www/hedwi-search/logs
+      - ./search/data:/data/www/hedwi-search/data
+    network_mode: "host"
+    environment:
+      HEDWI_SEARCH_RPC_ADDR: "${SEARCH_ADDR}"
+      HEDWI_CONSUL: "${CONSUL_ADDR}"
+    depends_on:
+       - consul
 
   web:
     image: hedwi/hedwi-inbox:latest
@@ -122,8 +137,7 @@ services:
       HEDWI_MEET_KEY: "${HEDWI_MEET_KEY}"
       HEDWI_MEET_SECRET: "${HEDWI_MEET_SECRET}"
       HEDWI_FROMUSER: ""
-      HEDWI_IMAP_ADDR: "${IMAP_ADDR}"
-      HEDWI_IMAP_TLS_ADDR: "${IMAP_TLS_ADDR}"
+      
       HEDWI_HUB_RPC_ADDR: "${HUB_ADDR}"
       HEDWI_SEARCH_RPC_ADDR: "${SEARCH_ADDR}"
       HEDWI_FILTER_RPC_ADDR: "${FILTER_ADDR}"
@@ -139,8 +153,14 @@ services:
       HEDWI_OSS_ADDR: "${MINIO_ADDR}"
       HEDWI_OSS_ACCESS_KEY: "${MINIO_USER}"
       HEDWI_OSS_ACCESS_SECRET: "${MINIO_PASSWORD}"
-      HEDWI_OSS_USE_SSL: "false"
+      HEDWI_OSS_USE_SSL: ${MINIO_USESSL}
       HEDWI_OSS_MAIL_BUCKET_NAME: "hedwimail"
+      HEDWI_DRIVE_OSS_PUBLIC_ADDR: "https://${DOMAIN}/oss/"
+      HEDWI_DRIVE_OSS_ADDR: "${MINIO_ADDR}"
+      HEDWI_DRIVE_OSS_ACCESS_KEY: "${MINIO_USER}"
+      HEDWI_DRIVE_OSS_ACCESS_SECRET: "${MINIO_PASSWORD}"
+      HEDWI_DRIVE_OSS_USE_SSL: ${MINIO_USESSL}
+      HEDWI_DRIVE_OSS_BUCKET_NAME: "drive"
       HEDWI_SESSION_HEDIS_HOST: "${REDIS_ADDR}"
       HEDWI_SESSION_HEDIS_PASSWORD: ""
       HEDWI_SESSION_HEDIS_DB: "1"
@@ -149,20 +169,6 @@ services:
       HEDWI_CACHE_HEDIS_PASSWORD: ""
       HEDWI_CACHE_HEDIS_DB: "0"
       HEDWI_CACHE_HEDIS_POOLSIZE: "20"
-      HEDWI_SMTP_KEY: "hedwi-smtp-bucket"
-      HEDWI_SMTP_HOSTNAME: ""
-      HEDWI_SMTP_MAX_DATASIZE: "50"
-      HEDWI_SMTP_DATA_DIR: "/data/www/hedwi-smtp/data"
-      HEDWI_SMTP_ADDRESSES: "${SMTP_ADDR}"
-      HEDWI_SMTP_SUBMISSION_ADDRESSES: "systemd"
-      HEDWI_SMTP_SUBMISSION_TLS_ADDRESSES: "${SMTP_TLS_ADDR}"
-      HEDWI_SMTP_MONITOR_ADDRESSES: ""
-      HEDWI_DRIVE_OSS_PUBLIC_ADDR: "${MINIO_PUBLIC_URL}"
-      HEDWI_DRIVE_OSS_ADDR: "${MINIO_ADDR}"
-      HEDWI_DRIVE_OSS_ACCESS_KEY: "${MINIO_USER}"
-      HEDWI_DRIVE_OSS_ACCESS_SECRET: "${MINIO_PASSWORD}"
-      HEDWI_DRIVE_OSS_USE_SSL: false
-      HEDWI_DRIVE_OSS_BUCKET_NAME: "drive"
     depends_on:
       #- db
        - crdb
@@ -171,7 +177,60 @@ services:
        - minio
        - consul
        - office-api
+       - search
        - meet-server
+
+  hub:
+    image: hedwi/hedwi-hub:latest
+    command: ["/data/www/hedwi-hub/hedwi-hub"]
+    build:
+      dockerfile: docker-compose.yml
+    restart: always
+    tty: true
+    volumes:
+      - ./smtp/logs:/data/www/hedwi-hub/logs
+      - ./smtp/certs:/tmp/hedwi-certs
+    network_mode: "host"
+    environment:
+    depends_on:
+
+  hedwi-smtp:
+    image: hedwi/hedwi-smtp:latest
+    command: ["/data/www/hedwi-smtp/hedwi-smtp"]
+    build:
+      dockerfile: docker-compose.yml
+    restart: always
+    tty: true
+    volumes:
+      - ./smtp/logs:/data/www/hedwi-smtp/logs
+      - ./smtp/certs:/tmp/hedwi-certs
+    network_mode: "host"
+    environment:
+      HEDWI_SMTP_KEY: "hedwi-smtp-bucket"
+      HEDWI_SMTP_HOSTNAME: ""
+      HEDWI_SMTP_MAX_DATASIZE: "50"
+      HEDWI_SMTP_DATA_DIR: "/data/www/hedwi-smtp/data"
+      HEDWI_SMTP_ADDRESSES: "${SMTP_ADDR}"
+      HEDWI_SMTP_SUBMISSION_ADDRESSES: "systemd"
+      HEDWI_SMTP_SUBMISSION_TLS_ADDRESSES: "${SMTP_TLS_ADDR}"
+      HEDWI_SMTP_MONITOR_ADDRESSES: ""
+    depends_on:
+      - hub
+
+  hedwi-imap:
+    image: hedwi/hedwi-imap:latest
+    command: ["/data/www/hedwi-imap/hedwi-imap"]
+    build:
+      dockerfile: docker-compose.yml
+    restart: always
+    tty: true
+    volumes:
+      - ./imap/logs:/data/www/hedwi-imap/logs
+      - ./imap/certs:/tmp/hedwi-certs
+    network_mode: "host"
+    environment:
+      HEDWI_IMAP_ADDR: "${IMAP_ADDR}"
+      HEDWI_IMAP_TLS_ADDR: "${IMAP_TLS_ADDR}"
 
   nginx:   #jenkins服务/其他服务（web服务/nginx服务等）
     image: nginx:1.22  #nginx镜像，如果镜像容器没有会去自动拉取
@@ -200,4 +259,7 @@ volumes:
     minio:
     office-api:
     meet-server:
+    hub:
+    smtp:
+    imap:
 
