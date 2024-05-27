@@ -6,3 +6,6 @@ compose-up:
 
 orb:
 	docker compose up -d
+
+cert:
+	sh bin/cert.sh
