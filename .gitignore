@@ -2,4 +2,4 @@ hedwi/redis/data/dump.rdb
 hedwi/minio/data/
 hedwi/mydb/data/
 hedwi/crdb/data/
-
+*.rdb

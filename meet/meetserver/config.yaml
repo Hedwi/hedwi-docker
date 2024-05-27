@@ -1,0 +1,28 @@
+web_addr: $MEET_ADDR
+port: 7880
+log_level: info
+rtc:
+  tcp_port: 7881
+  port_range_start: 50000
+  port_range_end: 60000
+  # use_external_ip should be set to true for most cloud environments where
+  # the host has a public IP address, but is not exposed to the process.
+  # LiveKit will attempt to use STUN to discover the true IP, and advertise
+  # that IP with its clients
+  use_external_ip: true
+redis:
+  # redis is recommended for production deploys
+  address: $REDIS_ADDR
+  db: 0
+  username: $REDIS_USER
+  password: $REDIS_PASSWORD
+keys:
+  $MEET_KEY: $MEET_SECRET
+# when enabled, LiveKit will expose prometheus metrics on :6789/metrics
+#prometheus_port: 6789
+turn:
+  enabled: true
+  # domain must match tls certificate
+  domain: $DOMAIN
+  # defaults to 3478. If not using a load balancer, must be set to 443.
+  tls_port: 3478
