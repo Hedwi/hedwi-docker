@@ -3,3 +3,4 @@ hedwi/minio/data/
 hedwi/mydb/data/
 hedwi/crdb/data/
 *.rdb
+.env
