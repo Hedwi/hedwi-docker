@@ -126,12 +126,13 @@ services:
     tty: true
     volumes:
       - ./inbox/logs:/data/www/hedwi-inbox/logs
-      - ./inbox/certs:/tmp/hedwi-certs
+      - ./inbox/certs:/tmp/hedwi_certs
       - /etc/ssl/certs/ca-bundle.crt:/etc/ssl/certs/ca-bundle.crt
       - /etc/ssl/certs/ca-bundle.trust.crt:/etc/ssl/certs/ca-bundle.trust.crt
     network_mode: "host"
     environment:
       HEDWI_LICENSE: "${HEDWI_LICENSE}"
+      HEDWI_CERT_DIR: "${HEDWI_CERT_DIR}"
       HEDWI_OFFICE_SERVER: "http://${OFFICE_API_ADDR}"
       HEDWI_MEET_SERVER: "${HEDWI_MEET_SERVER}"
       HEDWI_MEET_KEY: "${HEDWI_MEET_KEY}"
@@ -183,13 +184,15 @@ services:
     restart: always
     tty: true
     volumes:
-      - ./smtp/logs:/data/www/hedwi-hub/logs
-      - ./smtp/certs:/tmp/hedwi-certs
+      - ./hub/logs:/data/www/hedwi-hub/logs
+      - ./hub/certs:/tmp/hedwi_certs
     network_mode: "host"
     environment:
     depends_on:
+      - smtp
+      - imap
 
-  hedwi-smtp:
+  smtp:
     image: hedwi/hedwi-smtp:latest
     command: ["/data/www/hedwi-smtp/hedwi-smtp"]
     build:
@@ -198,7 +201,7 @@ services:
     tty: true
     volumes:
       - ./smtp/logs:/data/www/hedwi-smtp/logs
-      - ./smtp/certs:/tmp/hedwi-certs
+      - ./smtp/certs:/tmp/hedwi_certs
     network_mode: "host"
     environment:
       HEDWI_SMTP_KEY: "hedwi-smtp-bucket"
@@ -209,10 +212,8 @@ services:
       HEDWI_SMTP_SUBMISSION_ADDRESSES: "systemd"
       HEDWI_SMTP_SUBMISSION_TLS_ADDRESSES: "${SMTP_TLS_ADDR}"
       HEDWI_SMTP_MONITOR_ADDRESSES: ""
-    depends_on:
-      - hub
 
-  hedwi-imap:
+  imap:
     image: hedwi/hedwi-imap:latest
     command: ["/data/www/hedwi-imap/hedwi-imap"]
     build:
@@ -221,7 +222,7 @@ services:
     tty: true
     volumes:
       - ./imap/logs:/data/www/hedwi-imap/logs
-      - ./imap/certs:/tmp/hedwi-certs
+      - ./imap/certs:/tmp/hedwi_certs
     network_mode: "host"
     environment:
       HEDWI_IMAP_ADDR: "${IMAP_ADDR}"
@@ -235,13 +236,8 @@ services:
       - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/logs/access.log:/var/log/nginx_access.log
       - ./nginx/logs/error.log:/var/log/nginx_error.log
-      #- ./nginx/logs/inbox.error.log:/var/log/nginx/inbox.error.log
-      #- ./nginx/logs/access.log:/var/log/nginx/access.log
-      #- ./nginx/logs/error.log:/var/log/nginx/error.log
       - ./nginx/conf.d/inbox.conf:/etc/nginx/conf.d/default.conf #映射配置文件
-      - ./nginx/certs:/etc/nginx/certs #映射配置文件
-      - ./nginx/certs/*:/etc/ssl/certs #映射配置文件
-      - ./inbox/certs/*:/etc/nginx/certs # 当生成证书之后替换掉默认证书
+      - ./nginx/certs:/etc/nginx/certs:rw 
     depends_on:
       - web
     network_mode: "host"
