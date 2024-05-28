@@ -4,3 +4,5 @@ hedwi/mydb/data/
 hedwi/crdb/data/
 *.rdb
 .env
+inbox/certs/cert.crt
+inbox/certs/cert.key
