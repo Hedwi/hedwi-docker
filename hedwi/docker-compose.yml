@@ -88,12 +88,12 @@ services:
     network_mode: "host"
     environment:
       HEDWI_OFFICE_API_ADDR: "${OFFICE_API_ADDR}"
-      HEDWI_SQLDB: "postgresql://root@$CRDB_ADDR/${DB_NAME}"
+      HEDWI_SQLDB: "postgresql://root@${CRDB_ADDR}/${DB_NAME}"
       HEDWI_OSS_PUBLIC_ADDR: "https://${DOMAIN}/oss/"
       HEDWI_OSS_ADDR: "${MINIO_ADDR}"
       HEDWI_OSS_ACCESS_KEY: "${MINIO_USER}"
       HEDWI_OSS_ACCESS_SECRET: "${MINIO_PASSWORD}"
-      HEDWI_OSS_USE_SSL: ${MINIO_USESSL}
+      HEDWI_OSS_USE_SSL: "${MINIO_USESSL}"
       HEDWI_OSS_DRIVE_BUCKET_NAME: "drive"
     depends_on:
        - crdb
@@ -147,14 +147,14 @@ services:
       HEDWI_NATS_TASK_MAIL_SEND_SUBJECT: "hedwi-send"
       HEDWI_NATS_TASK_MAIL_SAVE_SUBJECT: "hedwi-save"
       HEDWI_CONSUL: "${CONSUL_ADDR}"
-      HEDWI_SQLDB: "postgresql://root@$CRDB_ADDR/${DB_NAME}"
+      HEDWI_SQLDB: "postgresql://root@${CRDB_ADDR}/${DB_NAME}"
       HEDWI_HTTP_ADDR: "${BINDIP}:40008"
       HEDWI_ALLOW_ORIGIN: "${ALLOW_ORIGIN}"
       HEDWI_OSS_PUBLIC_ADDR: "https://${DOMAIN}/oss/"
       HEDWI_OSS_ADDR: "${MINIO_ADDR}"
       HEDWI_OSS_ACCESS_KEY: "${MINIO_USER}"
       HEDWI_OSS_ACCESS_SECRET: "${MINIO_PASSWORD}"
-      HEDWI_OSS_USE_SSL: ${MINIO_USESSL}
+      HEDWI_OSS_USE_SSL: "${MINIO_USESSL}"
       HEDWI_OSS_DRIVE_BUCKET_NAME: "drive"
       HEDWI_OSS_MAIL_BUCKET_NAME: "hedwimail"
       HEDWI_SESSION_HEDIS_HOST: "${REDIS_ADDR}"
