@@ -199,6 +199,7 @@ services:
     tty: true
     volumes:
       - ./smtp/logs:/data/www/hedwi-smtp/logs
+      - ./smtp/data:/data/www/hedwi-smtp/data
       - ./smtp/certs:/tmp/hedwi_certs
     network_mode: "host"
     environment:
@@ -206,10 +207,12 @@ services:
       HEDWI_SMTP_HOSTNAME: ""
       HEDWI_SMTP_MAX_DATASIZE: "50"
       HEDWI_SMTP_DATA_DIR: "/data/www/hedwi-smtp/data"
+      HEDWI_CERT_DIR: "${HEDWI_CERT_DIR}"
       HEDWI_SMTP_ADDRESSES: "${SMTP_ADDR}"
       HEDWI_SMTP_SUBMISSION_ADDRESSES: "systemd"
       HEDWI_SMTP_SUBMISSION_TLS_ADDRESSES: "${SMTP_TLS_ADDR}"
       HEDWI_SMTP_MONITOR_ADDRESSES: ""
+      HEDWI_SMTP_MAILLOG_PATH: "/tmp/maillog.log"
     depends_on:
       - hub
 
