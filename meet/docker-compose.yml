@@ -43,9 +43,8 @@ services:
       - ./nginx/logs/access.log:/var/log/nginx_access.log
       - ./nginx/logs/error.log:/var/log/nginx_error.log
       - ./nginx/conf.d/meet.conf:/etc/nginx/conf.d/default.conf #映射配置文件
-      - ./nginx/certs:/etc/nginx/certs #映射配置文件
-      - ./nginx/certs:/etc/ssl/certs #映射配置文件
-      - ./meetserver/certs:/etc/nginx/certs # 当生成证书之后替换掉默认证书
+      - ./nginx/certs:/etc/nginx/certs:rw
+
     depends_on:
       - meet-server
     network_mode: "host"
