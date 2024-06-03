@@ -43,6 +43,19 @@ services:
     command: ["consul","agent","-server","-bootstrap","-data-dir","/consul","-ui","-bind","${BINDIP}","-client","0.0.0.0"]
     network_mode: "host"
 
+  nats:
+    image: "nats:2.9.25"
+    container_name: hedwi_nats
+    restart: always
+    command: -c /etc/nats/nats.conf
+    ports:
+      - "4222:4222" # client port
+      - "8222:8222" # monitoring port
+    volumes:
+      - ./nats/nats.conf:/etc/nats/nats.conf
+      - ./nats/data:/data
+    network_mode: "host"
+
   redis:
     image: 'redis:6.0'
     restart: always
@@ -100,6 +113,7 @@ services:
        - crdb-init
        - minio
 
+  
   search:
     image: hedwi/hedwi-search:latest
     container_name: hedwi_search       #容器的名称
@@ -143,11 +157,7 @@ services:
       HEDWI_HUB_RPC_ADDR: "${HUB_ADDR}"
       HEDWI_SEARCH_RPC_ADDR: "${SEARCH_ADDR}"
       HEDWI_FILTER_RPC_ADDR: "${FILTER_ADDR}"
-      HEDWI_NATS_URL: "${NATS_URL}"
-      HEDWI_NATS_CLUSTER_ID: "hedwi"
-      HEDWI_NATS_TASK_CLIENT_ID: "hedwi-service-a"
-      HEDWI_NATS_TASK_MAIL_SEND_SUBJECT: "hedwi-send"
-      HEDWI_NATS_TASK_MAIL_SAVE_SUBJECT: "hedwi-save"
+      
       HEDWI_CONSUL: "${CONSUL_ADDR}"
       HEDWI_SQLDB: "postgresql://root@${CRDB_ADDR}/${DB_NAME}"
       HEDWI_HTTP_ADDR: "${BINDIP}:40008"
@@ -180,15 +190,23 @@ services:
 
   hub:
     image: hedwi/hedwi-hub:latest
+    container_name: hedwi_hub
     command: ["/data/www/hedwi-hub/hedwi-hub"]
-    build:
-      dockerfile: docker-compose.yml
     restart: always
     tty: true
     volumes:
-      - ./smtp/logs:/data/www/hedwi-hub/logs
-      - ./smtp/certs:/tmp/hedwi_certs
+      - ./hub/logs:/data/www/hedwi-hub/logs
     network_mode: "host"
+    environment:
+      HEDWI_HUB_RPC_ADDR: "${HUB_ADDR}"
+      HEDWI_CONSUL: "${CONSUL_ADDR}"
+      HEDWI_NATS_URL: "${NATS_URL}"
+      HEDWI_NATS_CLUSTER_ID: "hedwi"
+      HEDWI_NATS_TASK_CLIENT_ID: "hedwi-service-a"
+      HEDWI_NATS_TASK_MAIL_SEND_SUBJECT: "hedwi-send"
+      HEDWI_NATS_TASK_MAIL_SAVE_SUBJECT: "hedwi-save"
+    depends_on:
+       - consul
 
   smtp:
     image: hedwi/hedwi-smtp:latest
