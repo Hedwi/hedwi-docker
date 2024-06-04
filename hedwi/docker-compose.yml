@@ -222,6 +222,42 @@ services:
        - consul
        - search
 
+  task:
+    image: hedwi/hedwi-task:latest
+    container_name: hedwi_task
+    command: ["/data/www/hedwi-task/hedwi-task"]
+    restart: always
+    tty: true
+    volumes:
+      - ./task/logs:/data/www/hedwi-task/logs
+    network_mode: "host"
+    environment:
+      HEDWI_SQLDB: "postgresql://root@${CRDB_ADDR}/${DB_NAME}"
+      HEDWI_CONSUL: "${CONSUL_ADDR}"
+      HEDWI_SESSION_HEDIS_HOST: "${REDIS_ADDR}"
+      HEDWI_SESSION_HEDIS_PASSWORD: ""
+      HEDWI_SESSION_HEDIS_DB: "1"
+      HEDWI_SESSION_HEDIS_POOLSIZE: "10"
+      HEDWI_OSS_PUBLIC_ADDR: "https://${DOMAIN}/oss/"
+      HEDWI_OSS_ADDR: "${MINIO_ADDR}"
+      HEDWI_OSS_ACCESS_KEY: "${MINIO_USER}"
+      HEDWI_OSS_ACCESS_SECRET: "${MINIO_PASSWORD}"
+      HEDWI_OSS_USE_SSL: "${MINIO_USESSL}"
+      HEDWI_OSS_MAIL_BUCKET_NAME: "hedwimail"
+      HEDWI_OSS_DRIVE_BUCKET_NAME: "drive"
+      HEDWI_NATS_URL: "${NATS_URL}"
+      HEDWI_NATS_CLUSTER_ID: "hedwi"
+      HEDWI_NATS_TASK_CLIENT_ID: "hedwi-service-a"
+      HEDWI_NATS_TASK_MAIL_SEND_SUBJECT: "hedwi-send"
+      HEDWI_NATS_TASK_MAIL_SAVE_SUBJECT: "hedwi-save"
+    depends_on:
+       - crdb
+       - redis
+       - nats
+       - minio
+       - consul
+       - search
+
   smtp:
     image: hedwi/hedwi-smtp:latest
     command: ["/data/www/hedwi-smtp/hedwi-smtp"]
