@@ -128,7 +128,7 @@ services:
        - consul
 
   web:
-    image: hedwi/hedwi-inbox:latest
+    image: ${DOCKER_REGISTRY}hedwi-inbox:latest
     command: ["/data/www/hedwi-inbox/hedwi-inbox"]
       #container_name: inboxserver
     build:
