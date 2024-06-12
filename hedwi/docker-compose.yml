@@ -67,7 +67,7 @@ services:
 
   
   meet-server:
-    image: hedwi/hedwi-meetserver:latest
+    image: ${DOCKER_REGISTRY}hedwi/hedwi-meetserver:latest
     restart: always
     volumes:
       - ./meetserver/config.yaml:/data/www/hedwi-meetserver/config.yaml
@@ -88,7 +88,7 @@ services:
 
 
   office-api:
-    image: hedwi/hedwi-office-api:latest
+    image: ${DOCKER_REGISTRY}hedwi/hedwi-office-api:latest
     container_name: hedwi_office_api       #容器的名称
     command: ["/data/www/hedwi-office-api/hedwi-office-api"]
     restart: always
@@ -112,7 +112,7 @@ services:
 
   
   search:
-    image: hedwi/hedwi-search:latest
+    image: ${DOCKER_REGISTRY}hedwi/hedwi-search:latest
     container_name: hedwi_search       #容器的名称
     command: ["/data/www/hedwi-search/hedwi-search"]
     restart: always
@@ -128,7 +128,7 @@ services:
        - consul
 
   web:
-    image: ${DOCKER_REGISTRY}hedwi-inbox:latest
+    image: ${DOCKER_REGISTRY}hedwi/hedwi-inbox:latest
     command: ["/data/www/hedwi-inbox/hedwi-inbox"]
     container_name: inboxserver
     restart: always
@@ -184,7 +184,7 @@ services:
        - meet-server
 
   hub:
-    image: hedwi/hedwi-hub:latest
+    image: ${DOCKER_REGISTRY}hedwi/hedwi-hub:latest
     container_name: hedwi_hub
     command: ["/data/www/hedwi-hub/hedwi-hub"]
     restart: always
@@ -221,7 +221,7 @@ services:
        - search
 
   task:
-    image: hedwi/hedwi-task:latest
+    image: ${DOCKER_REGISTRY}hedwi/hedwi-task:latest
     container_name: hedwi_task
     command: ["/data/www/hedwi-task/hedwi-task"]
     restart: always
@@ -257,7 +257,7 @@ services:
        - search
 
   smtp:
-    image: hedwi/hedwi-smtp:latest
+    image: ${DOCKER_REGISTRY}hedwi/hedwi-smtp:latest
     command: ["/data/www/hedwi-smtp/hedwi-smtp"]
     restart: always
     tty: true
@@ -281,7 +281,7 @@ services:
       - hub
 
   imap:
-    image: hedwi/hedwi-imap:latest
+    image: ${DOCKER_REGISTRY}hedwi/hedwi-imap:latest
     command: ["/data/www/hedwi-imap/hedwi-imap"]
     restart: always
     tty: true
