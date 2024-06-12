@@ -131,8 +131,6 @@ services:
     image: ${DOCKER_REGISTRY}hedwi-inbox:latest
     command: ["/data/www/hedwi-inbox/hedwi-inbox"]
     container_name: inboxserver
-    build:
-      dockerfile: docker-compose.yml
     restart: always
     tty: true
     volumes:
@@ -261,8 +259,6 @@ services:
   smtp:
     image: hedwi/hedwi-smtp:latest
     command: ["/data/www/hedwi-smtp/hedwi-smtp"]
-    build:
-      dockerfile: docker-compose.yml
     restart: always
     tty: true
     volumes:
@@ -287,8 +283,6 @@ services:
   imap:
     image: hedwi/hedwi-imap:latest
     command: ["/data/www/hedwi-imap/hedwi-imap"]
-    build:
-      dockerfile: docker-compose.yml
     restart: always
     tty: true
     volumes:
