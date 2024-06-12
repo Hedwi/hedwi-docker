@@ -17,3 +17,6 @@ copy:
 
 stop:
 	docker stop `docker ps -aq`
+
+down:
+	docker-compose down
