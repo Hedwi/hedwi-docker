@@ -2,14 +2,14 @@ version: '3'
 
 services:
   crdb:
-    image: cockroachdb/cockroach:v23.2.5
+    image: ${DOCKER_REGISTRY}hedwi/cockroach:v23.2.5
     command: start-single-node --insecure --listen-addr=${CRDB_ADDR} --http-addr=${CRDB_WEB_ADDR}
     volumes:
      - ./crdb/data:/cockroach/cockroach-data
     network_mode: "host"
 
   crdb-init:
-    image: cockroachdb/cockroach:v23.2.5
+    image: ${DOCKER_REGISTRY}hedwi/cockroach:v23.2.5
     volumes:
       - ./crdb/setup_db.sh:/setup_db.sh
     entrypoint: "/bin/bash"
@@ -19,7 +19,7 @@ services:
      - crdb
 
   minio:
-    image: minio/minio:latest
+    image: ${DOCKER_REGISTRY}hedwi/minio:RELEASE.2024-06-11T03-13-30Z
     restart: always
     container_name: hedwi_minio
     command: server /data/www/minio --address ${MINIO_ADDR} --console-address ${MINIO_WEB_ADDR}
@@ -37,14 +37,14 @@ services:
       - ./minio/config:/root/.minio
 
   consul:
-    image: hashicorp/consul:latest
+    image: ${DOCKER_REGISTRY}hedwi/consul:latest
     container_name: hedwi_consul
     restart: always
     command: ["consul","agent","-server","-bootstrap","-data-dir","/consul","-ui","-bind","${BINDIP}","-client","0.0.0.0"]
     network_mode: "host"
 
   nats:
-    image: "nats:2.9.25"
+    image: ${DOCKER_REGISTRY}hedwi/nats:2.9.25
     container_name: hedwi_nats
     restart: always
     command: -c /etc/nats/nats.conf
@@ -54,7 +54,7 @@ services:
     network_mode: "host"
 
   redis:
-    image: 'redis:6.0'
+    image: ${DOCKER_REGISTRY}hedwi/redis:6.0
     restart: always
     container_name: hedwi_redis
     volumes:
@@ -84,8 +84,6 @@ services:
       HEDWI_MEET_SECRET: "${HEDWI_MEET_SECRET}"
     depends_on:
       - redis
-
-
 
   office-api:
     image: ${DOCKER_REGISTRY}hedwi/hedwi-office-api:latest
