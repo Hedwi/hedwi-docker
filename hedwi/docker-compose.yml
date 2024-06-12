@@ -130,7 +130,7 @@ services:
   web:
     image: ${DOCKER_REGISTRY}hedwi-inbox:latest
     command: ["/data/www/hedwi-inbox/hedwi-inbox"]
-      #container_name: inboxserver
+    container_name: inboxserver
     build:
       dockerfile: docker-compose.yml
     restart: always
