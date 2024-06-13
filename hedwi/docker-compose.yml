@@ -180,6 +180,27 @@ services:
        - hub
        - search
        - meet-server
+       - mqtt
+
+  mqtt:
+    image: ${DOCKER_REGISTRY}hedwi/hedwi-mqtt:latest
+    container_name: hedwi_mqtt
+    command: ["/data/www/hedwi-mqtt/hedwi-mqtt"]
+    restart: always
+    tty: true
+    volumes:
+      - ./mqtt/logs:/data/www/hedwi-mqtt/logs
+    network_mode: "host"
+    environment:
+      HEDWI_MQTT_ID: "${MQTT_ID}"
+      HEDWI_MQTT_ADDR: "${MQTT_ADDR}"
+      HEDWI_SESSION_HEDIS_HOST: "${REDIS_ADDR}"
+      HEDWI_SESSION_HEDIS_PASSWORD: ""
+      HEDWI_SESSION_HEDIS_DB: "1"
+      HEDWI_SESSION_HEDIS_POOLSIZE: "10"
+    depends_on:
+       - redis
+
 
   hub:
     image: ${DOCKER_REGISTRY}hedwi/hedwi-hub:latest
