@@ -3,6 +3,7 @@ version: '3'
 services:
   crdb:
     image: ${DOCKER_REGISTRY}hedwi/cockroach:v23.2.5
+    restart: always
     command: start-single-node --insecure --listen-addr=${CRDB_ADDR} --http-addr=${CRDB_WEB_ADDR}
     volumes:
      - ./crdb/data:/cockroach/cockroach-data
