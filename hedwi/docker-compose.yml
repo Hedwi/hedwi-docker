@@ -148,6 +148,9 @@ services:
       HEDWI_MEET_SERVER: "${HEDWI_MEET_SERVER}"
       HEDWI_MEET_KEY: "${HEDWI_MEET_KEY}"
       HEDWI_MEET_SECRET: "${HEDWI_MEET_SECRET}"
+      HEDWI_MQTT_PUBLIC_ADDR: "mqtt://${DOMAIN}:1883"
+      HEDWI_MQTT_ID: "${MQTT_ID}"
+      HEDWI_MQTT_ADDR: "${MQTT_ADDR}"
       HEDWI_FROMUSER: ""
       HEDWI_HUB_RPC_ADDR: "${HUB_ADDR}"
       HEDWI_SEARCH_RPC_ADDR: "${SEARCH_ADDR}"
@@ -252,6 +255,7 @@ services:
     network_mode: "host"
     environment:
       HEDWI_SQLDB: "postgresql://root@${CRDB_ADDR}/${DB_NAME}"
+      HEDWI_SMTP_ADDRESSES: "${SMTP_ADDR}"
       HEDWI_CONSUL: "${CONSUL_ADDR}"
       HEDWI_SESSION_HEDIS_HOST: "${REDIS_ADDR}"
       HEDWI_SESSION_HEDIS_PASSWORD: ""
@@ -288,6 +292,7 @@ services:
       - ./smtp/certs:/tmp/hedwi_certs
     network_mode: "host"
     environment:
+      DOMAIN: "${DOMAIN}"
       HEDWI_SMTP_KEY: "hedwi-smtp-bucket"
       HEDWI_SMTP_HOSTNAME: ""
       HEDWI_SMTP_MAX_DATASIZE: "50"
