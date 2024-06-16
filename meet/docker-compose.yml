@@ -2,7 +2,7 @@ version: '3'
 
 services:
   redis:
-    image: 'redis:6.0'
+    image: ${DOCKER_REGISTRY}hedwi/redis:6.0
     restart: always
     container_name: meet_redis
     volumes:
@@ -15,7 +15,7 @@ services:
 
   
   meet-server:
-    image: hedwi/hedwi-meetserver:latest
+    image: ${DOCKER_REGISTRY}hedwi/hedwi-meetserver:latest
     restart: always
     volumes:
       - ./meetserver/config.yaml:/data/www/hedwi-meetserver/config.yaml
@@ -35,7 +35,7 @@ services:
 
 
   nginx:   #
-    image: nginx:1.22  #nginx镜像，如果镜像容器没有会去自动拉取
+    image: ${DOCKER_REGISTRY}hedwi/nginx:1.22  #nginx镜像，如果镜像容器没有会去自动拉取
     container_name: meet_nginx       #容器的名称
     restart: always             #跟随docker的启动而启动
     volumes:                    #挂载卷命令
@@ -46,6 +46,7 @@ services:
       - ./nginx/certs:/etc/nginx/certs:rw
 
     depends_on:
+      - redis
       - meet-server
     network_mode: "host"
 
