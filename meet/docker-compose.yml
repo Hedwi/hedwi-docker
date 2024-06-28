@@ -19,6 +19,9 @@ services:
     restart: always
     volumes:
       - ./meetserver/config.yaml:/data/www/hedwi-meetserver/config.yaml
+      - ./meetserver/certs:/tmp/hedwi_certs
+      - /etc/ssl/certs/ca-bundle.crt:/etc/ssl/certs/ca-bundle.crt
+      - /etc/ssl/certs/ca-bundle.trust.crt:/etc/ssl/certs/ca-bundle.trust.crt
     working_dir: /data/www/hedwi-meetserver
     command: ["/data/www/hedwi-meetserver/hedwi-meetserver"]
     network_mode: "host"
