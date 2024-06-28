@@ -1,5 +1,7 @@
 web_addr: $MEET_ADDR
 port: 7880
+domain: $DOMAIN
+cert_dir: /tmp/hedwi_certs
 log_level: info
 rtc:
   tcp_port: 7881
