@@ -19,3 +19,9 @@ stop:
 
 down:
 	docker-compose down
+
+remove:
+	sh bin/remove.sh
+
+upgrade:
+	remove && compose-up

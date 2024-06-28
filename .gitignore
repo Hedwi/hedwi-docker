@@ -6,3 +6,5 @@ hedwi/crdb/data/
 .env
 inbox/certs/cert.crt
 inbox/certs/cert.key
+meetserver/certs/cert.crt
+meetserver/certs/cert.key
