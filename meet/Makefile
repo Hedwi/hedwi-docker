@@ -24,8 +24,6 @@ down:
 remove-image:
 	sh bin/remove.sh
 
-remove:
-	down && remove-image
+remove: down remove-image
 
-upgrade:
-	remove && compose-up
+upgrade: remove compose-up
