@@ -149,7 +149,7 @@ services:
       HEDWI_MEET_KEY: "${HEDWI_MEET_KEY}"
       HEDWI_MEET_SECRET: "${HEDWI_MEET_SECRET}"
       HEDWI_MQTT_PUBLIC_ADDR: "mqtt://${DOMAIN}:1883"
-      HEDWI_MQTT_ID: "${MQTT_ID}"
+      HEDWI_MQTT_CLIENT_ID: "${MQTT_ID}"
       HEDWI_MQTT_ADDR: "${MQTT_ADDR}"
       HEDWI_FROMUSER: ""
       HEDWI_HUB_RPC_ADDR: "${HUB_ADDR}"
@@ -197,7 +197,7 @@ services:
       - ./mqtt/logs:/data/www/hedwi-mqtt/logs
     network_mode: "host"
     environment:
-      HEDWI_MQTT_ID: "${MQTT_ID}"
+      HEDWI_MQTT_CLIENT_ID: "${MQTT_ID}"
       HEDWI_MQTT_ADDR: "${MQTT_ADDR}"
       HEDWI_SESSION_HEDIS_HOST: "${REDIS_ADDR}"
       HEDWI_SESSION_HEDIS_PASSWORD: ""
