@@ -11,7 +11,7 @@ services:
 
   crdb-init:
     image: ${DOCKER_REGISTRY}hedwi/cockroach:v23.2.5
-    restart: on-failure:10
+    restart: on-failure:5
     volumes:
       - ./crdb/setup_db.sh:/setup_db.sh
     entrypoint: "/bin/bash"
