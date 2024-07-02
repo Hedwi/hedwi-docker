@@ -10,6 +10,7 @@ List=(hedwi-inbox hedwi-task hedwi-search hedwi-meetserver hedwi-filter hedwi-hu
 for name in ${List[@]};
 do
     echo $name;
-    ID=$(docker images --filter=reference="$DOCKER_REGISTRY"hedwi/"$NAME" --format "{{.ID}}");
+    REF="$DOCKER_REGISTRY"hedwi/"$name"
+    ID=$(docker images --filter=reference="$REF" --format "{{.ID}}");
     docker image rm -f $ID; 
 done
