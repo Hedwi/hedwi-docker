@@ -27,3 +27,6 @@ remove-image:
 remove: down remove-image
 
 upgrade: remove compose-up
+
+update:
+	sh bin/update.sh
