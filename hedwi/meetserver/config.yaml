@@ -1,4 +1,4 @@
-web_addr: $MEET_ADDR
+web_addr: $HEDWI_MEET_ADDR
 port: 7880
 log_level: info
 rtc:
