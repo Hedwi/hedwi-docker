@@ -27,12 +27,12 @@ services:
     network_mode: "host"
     environment:
       DOMAIN: "${DOMAIN}"
-      MEET_ADDR: "${HEDWI_MEET_ADDR}"
+      HEDWI_MEET_ADDR: "${MEET_ADDR}"
       REDIS_ADDR: "${REDIS_ADDR}"
       REDIS_USER: "${REDIS_USER}"
       REDIS_PASSWORD: "${REDIS_PASSWORD}"
-      HEDWI_MEET_KEY: "${HEDWI_MEET_KEY}"
-      HEDWI_MEET_SECRET: "${HEDWI_MEET_SECRET}"
+      HEDWI_MEET_KEY: "${MEET_KEY}"
+      HEDWI_MEET_SECRET: "${MEET_SECRET}"
     depends_on:
       - redis
 
