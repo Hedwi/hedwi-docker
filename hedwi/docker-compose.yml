@@ -301,13 +301,17 @@ services:
       HEDWI_SMTP_MAX_DATASIZE: "50"
       HEDWI_SMTP_DATA_DIR: "/data/www/hedwi-smtp/data"
       HEDWI_CERT_DIR: "${CERT_DIR}"
+      HEDWI_CONSUL: "${CONSUL_ADDR}"
       HEDWI_SMTP_ADDRESSES: "${SMTP_ADDR}"
       HEDWI_SMTP_SUBMISSION_ADDRESSES: "systemd"
       HEDWI_SMTP_SUBMISSION_TLS_ADDRESSES: "${SMTP_TLS_ADDR}"
       HEDWI_SMTP_MONITOR_ADDRESSES: ""
       HEDWI_SMTP_MAILLOG_PATH: "/tmp/maillog.log"
+      HEDWI_OSS_DRIVE_BUCKET_NAME: "drive"
+      HEDWI_OSS_MAIL_BUCKET_NAME: "hedwimail"
     depends_on:
       - hub
+      - consul
 
   imap:
     image: ${DOCKER_REGISTRY}hedwi/hedwi-imap:latest
