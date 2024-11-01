@@ -1,4 +1,4 @@
-web_addr: $MEET_ADDR
+web_addr: $HEDWI_MEET_ADDR
 port: 7880
 domain: $DOMAIN
 cert_dir: /tmp/hedwi_certs
