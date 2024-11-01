@@ -252,12 +252,15 @@ services:
     restart: always
     tty: true
     volumes:
+      - /etc/ssl/certs/ca-bundle.crt:/etc/ssl/certs/ca-bundle.crt
+      - /etc/ssl/certs/ca-bundle.trust.crt:/etc/ssl/certs/ca-bundle.trust.crt
       - ./task/logs:/data/www/hedwi-task/logs
     network_mode: "host"
     environment:
       HEDWI_SQLDB: "postgresql://root@${CRDB_ADDR}/${DB_NAME}"
       HEDWI_SMTP_ADDRESSES: "${SMTP_ADDR}"
-      HEDWI_LOCAL_SMTP: "${DOMAIN}:42025"
+      HEDWI_SMTP_KEY: "hedwi-smtp-bucket"
+      HEDWI_LOCAL_SMTP: "${DOMAIN}:40025"
       HEDWI_CONSUL: "${CONSUL_ADDR}"
       HEDWI_SESSION_HEDIS_HOST: "${REDIS_ADDR}"
       HEDWI_SESSION_HEDIS_PASSWORD: ""
@@ -307,8 +310,6 @@ services:
       HEDWI_SMTP_SUBMISSION_TLS_ADDRESSES: "${SMTP_TLS_ADDR}"
       HEDWI_SMTP_MONITOR_ADDRESSES: ""
       HEDWI_SMTP_MAILLOG_PATH: "/tmp/maillog.log"
-      HEDWI_OSS_DRIVE_BUCKET_NAME: "drive"
-      HEDWI_OSS_MAIL_BUCKET_NAME: "hedwimail"
     depends_on:
       - hub
       - consul
