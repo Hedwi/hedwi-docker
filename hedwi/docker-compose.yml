@@ -78,7 +78,7 @@ services:
     network_mode: "host"
     environment:
       DOMAIN: "${DOMAIN}"
-      MEET_ADDR: "${MEET_ADDR}"
+      HEDWI_MEET_ADDR: "${MEET_ADDR}"
       REDIS_ADDR: "${REDIS_ADDR}"
       REDIS_USER: "${REDIS_USER}"
       REDIS_PASSWORD: "${REDIS_PASSWORD}"
