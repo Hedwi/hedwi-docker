@@ -134,7 +134,7 @@ services:
     restart: always
     tty: true
     volumes:
-      - ./inbox/logs:/data/www/hedwi-inbox/logs
+      - ./inbox/logs:/data/www/logs
       - ./inbox/certs:/tmp/hedwi_certs
       - /etc/ssl/certs/ca-bundle.crt:/etc/ssl/certs/ca-bundle.crt
       - /etc/ssl/certs/ca-bundle.trust.crt:/etc/ssl/certs/ca-bundle.trust.crt
