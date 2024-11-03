@@ -94,7 +94,7 @@ services:
     restart: always
     tty: true
     volumes:
-      - ./office-api/logs:/data/www/hedwi-office-api/logs
+      - ./office-api/logs:/data/www/logs
     network_mode: "host"
     environment:
       HEDWI_OFFICE_API_ADDR: "${OFFICE_API_ADDR}"
@@ -118,7 +118,7 @@ services:
     restart: always
     tty: true
     volumes:
-      - ./search/logs:/data/www/hedwi-search/logs
+      - ./search/logs:/data/www/logs
       - ./search/data:/data/www/hedwi-search/data
     network_mode: "host"
     environment:
@@ -195,7 +195,7 @@ services:
     restart: always
     tty: true
     volumes:
-      - ./mqtt/logs:/data/www/hedwi-mqtt/logs
+      - ./mqtt/logs:/data/www/logs
     network_mode: "host"
     environment:
       HEDWI_MQTT_CLIENT_ID: "${MQTT_ID}"
@@ -215,7 +215,7 @@ services:
     restart: always
     tty: true
     volumes:
-      - ./hub/logs:/data/www/hedwi-hub/logs
+      - ./hub/logs:/data/www/logs
     network_mode: "host"
     environment:
       HEDWI_HUB_RPC_ADDR: "${HUB_ADDR}"
@@ -254,7 +254,7 @@ services:
     volumes:
       - /etc/ssl/certs/ca-bundle.crt:/etc/ssl/certs/ca-bundle.crt
       - /etc/ssl/certs/ca-bundle.trust.crt:/etc/ssl/certs/ca-bundle.trust.crt
-      - ./task/logs:/data/www/hedwi-task/logs
+      - ./task/logs:/data/www/logs
     network_mode: "host"
     environment:
       HEDWI_SQLDB: "postgresql://root@${CRDB_ADDR}/${DB_NAME}"
@@ -292,7 +292,7 @@ services:
     restart: always
     tty: true
     volumes:
-      - ./smtp/logs:/data/www/hedwi-smtp/logs
+      - ./smtp/logs:/data/www/logs
       - ./smtp/data:/data/www/hedwi-smtp/data
       - ./smtp/certs:/tmp/hedwi_certs
     network_mode: "host"
@@ -320,7 +320,7 @@ services:
     restart: always
     tty: true
     volumes:
-      - ./imap/logs:/data/www/hedwi-imap/logs
+      - ./imap/logs:/data/www/logs
       - ./imap/certs:/tmp/hedwi_certs
     network_mode: "host"
     environment:
