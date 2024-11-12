@@ -245,6 +245,32 @@ services:
        - consul
        - search
 
+  filter:
+    image: ${DOCKER_REGISTRY}hedwi/hedwi-filter:latest
+    container_name: hedwi_filter
+    command: ["/data/www/hedwi-filter/hedwi-filter"]
+    restart: always
+    tty: true
+    volumes:
+      - /etc/ssl/certs/ca-bundle.crt:/etc/ssl/certs/ca-bundle.crt
+      - /etc/ssl/certs/ca-bundle.trust.crt:/etc/ssl/certs/ca-bundle.trust.crt
+      - ./filter/logs:/data/www/logs
+    network_mode: "host"
+    environment:
+      HEDWI_SQLDB: "postgresql://root@${CRDB_ADDR}/${DB_NAME}"
+      HEDWI_FILTER_RPC_ADDR: "${FILTER_ADDR}"
+      HEDWI_CONSUL: "${CONSUL_ADDR}"
+      HEDWI_OSS_PUBLIC_ADDR: "${DOMAIN}"
+      HEDWI_OSS_ADDR: "${MINIO_ADDR}"
+      HEDWI_OSS_ACCESS_KEY: "${MINIO_USER}"
+      HEDWI_OSS_ACCESS_SECRET: "${MINIO_PASSWORD}"
+      HEDWI_OSS_USE_SSL: "${MINIO_USESSL}"
+      HEDWI_OSS_MAIL_BUCKET_NAME: "hedwimail"
+      HEDWI_OSS_DRIVE_BUCKET_NAME: "drive"
+    depends_on:
+       - minio
+       - consul
+
   task:
     image: ${DOCKER_REGISTRY}hedwi/hedwi-task:latest
     container_name: hedwi_task
@@ -285,6 +311,7 @@ services:
        - minio
        - consul
        - search
+       - filter
 
   smtp:
     image: ${DOCKER_REGISTRY}hedwi/hedwi-smtp:latest
