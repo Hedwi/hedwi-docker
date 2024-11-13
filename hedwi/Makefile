@@ -14,6 +14,7 @@ generate:
 
 copy:
 	 \cp -f inbox/certs/cert.key nginx/certs/cert.key && \cp -f inbox/certs/cert.crt nginx/certs/cert.crt
+	 \cp -f inbox/certs/cert.key smtp/certs/cert.key && \cp -f inbox/certs/cert.crt smtp/certs/cert.crt
 
 stop: #docker stop `docker ps -aq`
 	docker-compose down
