@@ -175,6 +175,9 @@ services:
       HEDWI_CACHE_HEDIS_DB: "0"
       HEDWI_CACHE_HEDIS_POOLSIZE: "20"
       HEDWI_PUBLIC_DRIVE_PREFIX: "${PUBLIC_DRIVE_PREFIX}"
+      HEDWI_AI_TOKEN: "${AI_TOKEN}"
+      HEDWI_AI_MODEL: "${AI_MODEL}"
+      HEDWI_AI_TYPE: "${AI_TYPE}"
     depends_on:
       #- db
        - crdb
