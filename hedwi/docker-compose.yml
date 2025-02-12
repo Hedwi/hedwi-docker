@@ -42,7 +42,7 @@ services:
     image: ${DOCKER_REGISTRY}hedwi/consul:1.18
     container_name: hedwi_consul
     restart: always
-    command: ["consul","agent","-server","-bootstrap","-data-dir","/consul","-ui","-bind","${BINDIP}","-client","0.0.0.0"]
+    command: ["consul","agent","-server","-bootstrap","-data-dir","/consul","-ui","-bind","${CONSUL_IP}","-client","0.0.0.0"]
     network_mode: "host"
 
   nats:
