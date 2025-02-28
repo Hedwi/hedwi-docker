@@ -140,6 +140,7 @@ services:
       - /etc/ssl/certs/ca-bundle.trust.crt:/etc/ssl/certs/ca-bundle.trust.crt
     network_mode: "host"
     environment:
+      DOMAIN: "${DOMAIN}"
       HEDWI_LICENSE: "${HEDWI_LICENSE}"
       HEDWI_ADMIN_EMAIL: "${ADMIN_EMAIL}"
       HEDWI_ADMIN_PASSWORD: "${ADMIN_PASSWORD}"
