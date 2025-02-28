@@ -77,7 +77,7 @@ services:
     command: ["/data/www/hedwi-meetserver/hedwi-meetserver"]
     network_mode: "host"
     environment:
-      DOMAIN: "${DOMAIN}"
+      HEDWI_SELF_DOMAIN: "${DOMAIN}"
       HEDWI_MEET_ADDR: "${MEET_ADDR}"
       REDIS_ADDR: "${REDIS_ADDR}"
       REDIS_USER: "${REDIS_USER}"
@@ -140,7 +140,7 @@ services:
       - /etc/ssl/certs/ca-bundle.trust.crt:/etc/ssl/certs/ca-bundle.trust.crt
     network_mode: "host"
     environment:
-      DOMAIN: "${DOMAIN}"
+      HEDWI_SELF_DOMAIN: "${DOMAIN}"
       HEDWI_LICENSE: "${HEDWI_LICENSE}"
       HEDWI_ADMIN_EMAIL: "${ADMIN_EMAIL}"
       HEDWI_ADMIN_PASSWORD: "${ADMIN_PASSWORD}"
@@ -328,7 +328,6 @@ services:
       - ./smtp/certs:/tmp/hedwi_certs
     network_mode: "host"
     environment:
-      DOMAIN: "${DOMAIN}"
       HEDWI_SELF_DOMAIN: "${DOMAIN}"
       HEDWI_SMTP_KEY: "hedwi-smtp-bucket"
       HEDWI_SMTP_HOSTNAME: ""
