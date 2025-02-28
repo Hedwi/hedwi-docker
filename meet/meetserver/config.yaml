@@ -1,6 +1,6 @@
 web_addr: $HEDWI_MEET_ADDR
 port: 7880
-domain: $DOMAIN
+domain: $HEDWI_SELF_DOMAIN
 cert_dir: /tmp/hedwi_certs
 log_level: info
 rtc:
