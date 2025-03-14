@@ -13,7 +13,12 @@ zh-hans: [视频会议文档中文版](https://hedwi.com/document/meet/zh-hans/)
 
 
 ```
+  #  国外用户
   git clone https://github.com/Hedwi/hedwi-docker.git
+
+  #  国内用户
+  git clone https://gitee.com/Hedwi/hedwi-docker.git
+
   cd hedwi-docker/hedwi && make
   
 ```
