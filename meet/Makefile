@@ -30,3 +30,5 @@ upgrade: remove compose-up
 
 update:
 	sh bin/update.sh
+
+restart: down compose-up
