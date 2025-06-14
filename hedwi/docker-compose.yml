@@ -179,6 +179,11 @@ services:
       HEDWI_AI_TOKEN: "${AI_TOKEN}"
       HEDWI_AI_MODEL: "${AI_MODEL}"
       HEDWI_AI_TYPE: "${AI_TYPE}"
+      HEDWI_NATS_URL: "${NATS_URL}"
+      HEDWI_NATS_CLUSTER_ID: "hedwi"
+      HEDWI_NATS_TASK_CLIENT_ID: "hedwi-service-a"
+      HEDWI_NATS_TASK_MAIL_SEND_SUBJECT: "hedwi-send"
+      HEDWI_NATS_TASK_MAIL_SAVE_SUBJECT: "hedwi-save"
     depends_on:
       #- db
        - crdb
