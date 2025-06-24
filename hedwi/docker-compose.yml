@@ -38,13 +38,6 @@ services:
       - ./minio/data:/data/www/minio
       - ./minio/config:/root/.minio
 
-  consul:
-    image: ${DOCKER_REGISTRY}hedwi/consul:1.18
-    container_name: hedwi_consul
-    restart: always
-    command: ["consul","agent","-server","-bootstrap","-data-dir","/consul","-ui","-bind","${CONSUL_IP}","-client","0.0.0.0"]
-    network_mode: "host"
-
   nats:
     image: ${DOCKER_REGISTRY}hedwi/nats:2.9.25
     container_name: hedwi_nats
@@ -122,10 +115,10 @@ services:
       - ./search/data:/data/www/hedwi-search/data
     network_mode: "host"
     environment:
-      HEDWI_SEARCH_RPC_ADDR: "${SEARCH_ADDR}"
-      HEDWI_CONSUL: "${CONSUL_ADDR}"
+      HEDWI_SEARCH_SERVER: "${SEARCH_ADDR}"
+      HEDWI_TYPESENSE_ADDR: "${TYPESENSE_ADDR}:${TYPESENSE_PORT}"
     depends_on:
-       - consul
+       - typesense
 
   web:
     image: ${DOCKER_REGISTRY}hedwi/hedwi-inbox:latest
@@ -153,10 +146,7 @@ services:
       HEDWI_MQTT_CLIENT_ID: "${MQTT_ID}"
       HEDWI_MQTT_ADDR: "${MQTT_IP}:${MQTT_PORT}"
       HEDWI_FROMUSER: ""
-      HEDWI_HUB_RPC_ADDR: "${HUB_ADDR}"
-      HEDWI_SEARCH_RPC_ADDR: "${SEARCH_ADDR}"
-      HEDWI_FILTER_RPC_ADDR: "${FILTER_ADDR}"
-      HEDWI_CONSUL: "${CONSUL_ADDR}"
+      HEDWI_SEARCH_SERVER: "${SEARCH_ADDR}"
       HEDWI_SQLDB: "postgresql://root@${CRDB_ADDR}/${DB_NAME}"
       HEDWI_HTTP_ADDR: "${BINDIP}:40008"
       HEDWI_ALLOW_ORIGIN: "${ALLOW_ORIGIN}"
@@ -190,12 +180,26 @@ services:
        - crdb-init
        - redis
        - minio
-       - consul
        - office-api
-       - hub
        - search
        - meet-server
        - mqtt
+
+  typesense:
+    image: ${DOCKER_REGISTRY}hedwi/typesense:28.0
+    container_name: typesense
+    command: /data/www/typesense/typesense --data-dir /data/www/typesense --api-key=${TYPESENSE_KEY} --api-address=${TYPESENSE_ADDR} --api-port=${TYPESENSE_PORT}
+    restart: on-failure
+    tty: true
+    volumes:
+      - ./typesense/logs:/data/www/logs
+      - ./typesense/data:/data/www/data
+    network_mode: "host"
+    environment:
+      TYPESENSE_KEY: "${TYPESENSE_KEY}"
+      TYPESENSE_ADDR: "${TYPESENSE_ADDR}"
+      TYPESENSE_PORT: "${TYPESENSE_PORT}"
+
 
   mqtt:
     image: ${DOCKER_REGISTRY}hedwi/hedwi-mqtt:latest
@@ -216,70 +220,6 @@ services:
     depends_on:
        - redis
 
-
-  hub:
-    image: ${DOCKER_REGISTRY}hedwi/hedwi-hub:latest
-    container_name: hedwi_hub
-    command: ["/data/www/hedwi-hub/hedwi-hub"]
-    restart: always
-    tty: true
-    volumes:
-      - ./hub/logs:/data/www/logs
-    network_mode: "host"
-    environment:
-      HEDWI_HUB_RPC_ADDR: "${HUB_ADDR}"
-      HEDWI_SQLDB: "postgresql://root@${CRDB_ADDR}/${DB_NAME}"
-      HEDWI_CONSUL: "${CONSUL_ADDR}"
-      HEDWI_SESSION_HEDIS_HOST: "${REDIS_ADDR}"
-      HEDWI_SESSION_HEDIS_PASSWORD: ""
-      HEDWI_SESSION_HEDIS_DB: "1"
-      HEDWI_SESSION_HEDIS_POOLSIZE: "10"
-      HEDWI_OSS_PUBLIC_ADDR: "${DOMAIN}"
-      HEDWI_OSS_ADDR: "${MINIO_ADDR}"
-      HEDWI_OSS_ACCESS_KEY: "${MINIO_USER}"
-      HEDWI_OSS_ACCESS_SECRET: "${MINIO_PASSWORD}"
-      HEDWI_OSS_USE_SSL: "${MINIO_USESSL}"
-      HEDWI_OSS_MAIL_BUCKET_NAME: "hedwimail"
-      HEDWI_OSS_DRIVE_BUCKET_NAME: "drive"
-      HEDWI_NATS_URL: "${NATS_URL}"
-      HEDWI_NATS_CLUSTER_ID: "hedwi"
-      HEDWI_NATS_TASK_CLIENT_ID: "hedwi-service-a"
-      HEDWI_NATS_TASK_MAIL_SEND_SUBJECT: "hedwi-send"
-      HEDWI_NATS_TASK_MAIL_SAVE_SUBJECT: "hedwi-save"
-    depends_on:
-       - crdb
-       - redis
-       - nats
-       - minio
-       - consul
-       - search
-
-  filter:
-    image: ${DOCKER_REGISTRY}hedwi/hedwi-filter:latest
-    container_name: hedwi_filter
-    command: ["/data/www/hedwi-filter/hedwi-filter"]
-    restart: always
-    tty: true
-    volumes:
-      - /etc/ssl/certs/ca-bundle.crt:/etc/ssl/certs/ca-bundle.crt
-      - /etc/ssl/certs/ca-bundle.trust.crt:/etc/ssl/certs/ca-bundle.trust.crt
-      - ./filter/logs:/data/www/logs
-    network_mode: "host"
-    environment:
-      HEDWI_SQLDB: "postgresql://root@${CRDB_ADDR}/${DB_NAME}"
-      HEDWI_FILTER_RPC_ADDR: "${FILTER_ADDR}"
-      HEDWI_CONSUL: "${CONSUL_ADDR}"
-      HEDWI_OSS_PUBLIC_ADDR: "${DOMAIN}"
-      HEDWI_OSS_ADDR: "${MINIO_ADDR}"
-      HEDWI_OSS_ACCESS_KEY: "${MINIO_USER}"
-      HEDWI_OSS_ACCESS_SECRET: "${MINIO_PASSWORD}"
-      HEDWI_OSS_USE_SSL: "${MINIO_USESSL}"
-      HEDWI_OSS_MAIL_BUCKET_NAME: "hedwimail"
-      HEDWI_OSS_DRIVE_BUCKET_NAME: "drive"
-    depends_on:
-       - minio
-       - consul
-
   task:
     image: ${DOCKER_REGISTRY}hedwi/hedwi-task:latest
     container_name: hedwi_task
@@ -296,7 +236,7 @@ services:
       HEDWI_SMTP_ADDRESSES: "${SMTP_ADDR}"
       HEDWI_SMTP_KEY: "hedwi-smtp-bucket"
       HEDWI_LOCAL_SMTP: "${DOMAIN}:40025"
-      HEDWI_CONSUL: "${CONSUL_ADDR}"
+      HEDWI_SEARCH_SERVER: "${SEARCH_ADDR}"
       HEDWI_SESSION_HEDIS_HOST: "${REDIS_ADDR}"
       HEDWI_SESSION_HEDIS_PASSWORD: ""
       HEDWI_SESSION_HEDIS_DB: "1"
@@ -318,9 +258,7 @@ services:
        - redis
        - nats
        - minio
-       - consul
        - search
-       - filter
 
   smtp:
     image: ${DOCKER_REGISTRY}hedwi/hedwi-smtp:latest
@@ -339,15 +277,38 @@ services:
       HEDWI_SMTP_MAX_DATASIZE: "50"
       HEDWI_SMTP_DATA_DIR: "/data/www/hedwi-smtp/data"
       HEDWI_CERT_DIR: "${CERT_DIR}"
-      HEDWI_CONSUL: "${CONSUL_ADDR}"
       HEDWI_SMTP_ADDRESSES: "${SMTP_ADDR}"
       HEDWI_SMTP_SUBMISSION_ADDRESSES: "systemd"
       HEDWI_SMTP_SUBMISSION_TLS_ADDRESSES: "${SMTP_TLS_ADDR}"
       HEDWI_SMTP_MONITOR_ADDRESSES: ""
       HEDWI_SMTP_MAILLOG_PATH: "/tmp/maillog.log"
+      HEDWI_SQLDB: "postgresql://root@${CRDB_ADDR}/${DB_NAME}"
+      HEDWI_NATS_URL: "${NATS_URL}"
+      HEDWI_NATS_CLUSTER_ID: "hedwi"
+      HEDWI_NATS_TASK_CLIENT_ID: "hedwi-service-a"
+      HEDWI_NATS_TASK_MAIL_SEND_SUBJECT: "hedwi-send"
+      HEDWI_NATS_TASK_MAIL_SAVE_SUBJECT: "hedwi-save"
+      HEDWI_SESSION_HEDIS_HOST: "${REDIS_ADDR}"
+      HEDWI_SESSION_HEDIS_PASSWORD: ""
+      HEDWI_SESSION_HEDIS_DB: "1"
+      HEDWI_SESSION_HEDIS_POOLSIZE: "10"
+      HEDWI_CACHE_HEDIS_HOST: "${REDIS_ADDR}"
+      HEDWI_CACHE_HEDIS_PASSWORD: ""
+      HEDWI_CACHE_HEDIS_DB: "0"
+      HEDWI_CACHE_HEDIS_POOLSIZE: "20"
+      HEDWI_OSS_PUBLIC_ADDR: "${DOMAIN}"
+      HEDWI_OSS_ADDR: "${MINIO_ADDR}"
+      HEDWI_OSS_ACCESS_KEY: "${MINIO_USER}"
+      HEDWI_OSS_ACCESS_SECRET: "${MINIO_PASSWORD}"
+      HEDWI_OSS_USE_SSL: "${MINIO_USESSL}"
+      HEDWI_OSS_MAIL_BUCKET_NAME: "hedwimail"
+      HEDWI_OSS_DRIVE_BUCKET_NAME: "drive"
+
     depends_on:
-      - hub
-      - consul
+      - search
+      - minio
+      - redis
+      - nats
 
   imap:
     image: ${DOCKER_REGISTRY}hedwi/hedwi-imap:latest
@@ -362,7 +323,8 @@ services:
       HEDWI_IMAP_ADDR: "${IMAP_ADDR}"
       HEDWI_IMAP_TLS_ADDR: "${IMAP_TLS_ADDR}"
     depends_on:
-      - hub
+      - search
+      - crdb
 
   nginx:   #nginx
     image: ${DOCKER_REGISTRY}hedwi/nginx:1.22  #nginx镜像，如果镜像容器没有会去自动拉取
