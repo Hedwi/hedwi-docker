@@ -255,6 +255,7 @@ services:
       HEDWI_NATS_TASK_MAIL_SAVE_SUBJECT: "hedwi-save"
     depends_on:
        - crdb
+       - crdb-init
        - redis
        - nats
        - minio
@@ -325,6 +326,7 @@ services:
     depends_on:
       - search
       - crdb
+      - crdb-init
 
   nginx:   #nginx
     image: ${DOCKER_REGISTRY}hedwi/nginx:1.22  #nginx镜像，如果镜像容器没有会去自动拉取
