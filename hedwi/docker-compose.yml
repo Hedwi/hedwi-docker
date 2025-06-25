@@ -188,7 +188,7 @@ services:
   typesense:
     image: ${DOCKER_REGISTRY}hedwi/typesense:28.0
     container_name: typesense
-    command: /data/www/typesense/typesense --data-dir /data/www/typesense --api-key=${TYPESENSE_KEY} --api-address=${TYPESENSE_ADDR} --api-port=${TYPESENSE_PORT}
+    command: --data-dir /data/www/data --api-key=${TYPESENSE_KEY} --api-address=${TYPESENSE_ADDR} --api-port=${TYPESENSE_PORT}
     restart: on-failure
     tty: true
     volumes:
@@ -199,7 +199,6 @@ services:
       TYPESENSE_KEY: "${TYPESENSE_KEY}"
       TYPESENSE_ADDR: "${TYPESENSE_ADDR}"
       TYPESENSE_PORT: "${TYPESENSE_PORT}"
-
 
   mqtt:
     image: ${DOCKER_REGISTRY}hedwi/hedwi-mqtt:latest
