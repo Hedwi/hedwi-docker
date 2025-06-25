@@ -115,8 +115,9 @@ services:
       - ./search/data:/data/www/hedwi-search/data
     network_mode: "host"
     environment:
-      HEDWI_SEARCH_SERVER: "${SEARCH_ADDR}"
+      HEDWI_SEARCH_ADDR: "${SEARCH_ADDR}"
       HEDWI_TYPESENSE_ADDR: "${TYPESENSE_ADDR}:${TYPESENSE_PORT}"
+      HEDWI_TYPESENSE_KEY: "${TYPESENSE_KEY}"
     depends_on:
        - typesense
 
