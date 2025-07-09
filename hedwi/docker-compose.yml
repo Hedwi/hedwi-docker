@@ -130,8 +130,10 @@ services:
     volumes:
       - ./inbox/logs:/data/www/logs
       - ./inbox/certs:/tmp/hedwi_certs
-      - /etc/ssl/certs/ca-bundle.crt:/etc/ssl/certs/ca-bundle.crt
-      - /etc/ssl/certs/ca-bundle.trust.crt:/etc/ssl/certs/ca-bundle.trust.crt
+      #- /etc/ssl/certs/ca-bundle.crt:/etc/ssl/certs/ca-bundle.crt":
+      #- /etc/ssl/certs/ca-bundle.trust.crt:/etc/ssl/certs/ca-bundle.trust.crt
+      - ./1:/etc/ssl/certs/ca-bundle.crt
+      - ./2:/etc/ssl/certs/ca-bundle.trust.crt
     network_mode: "host"
     environment:
       HEDWI_SELF_DOMAIN: "${DOMAIN}"
@@ -189,12 +191,12 @@ services:
   typesense:
     image: ${DOCKER_REGISTRY}hedwi/typesense:28.0
     container_name: typesense
-    command: --data-dir /data/www/data --api-key=${TYPESENSE_KEY} --api-address=${TYPESENSE_ADDR} --api-port=${TYPESENSE_PORT}
+    command: --data-dir /data --api-key=${TYPESENSE_KEY} --api-address=${TYPESENSE_ADDR} --api-port=${TYPESENSE_PORT}
     restart: on-failure
     tty: true
     volumes:
-      - ./typesense/logs:/data/www/logs
-      - ./typesense/data:/data/www/data
+      - ./typesense/data:/data
+      - ./typesense/logs:/data/logs
     network_mode: "host"
     environment:
       TYPESENSE_KEY: "${TYPESENSE_KEY}"
@@ -270,6 +272,8 @@ services:
       - ./smtp/logs:/data/www/logs
       - ./smtp/data:/data/www/hedwi-smtp/data
       - ./smtp/certs:/tmp/hedwi_certs
+      - ./1:/etc/ssl/certs/ca-bundle.crt
+      - ./2:/etc/ssl/certs/ca-bundle.trust.crt
     network_mode: "host"
     environment:
       HEDWI_SELF_DOMAIN: "${DOMAIN}"
